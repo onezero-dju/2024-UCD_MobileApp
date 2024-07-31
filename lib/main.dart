@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Directory tempDir = await getTemporaryDirectory();
     await _recorder.startRecorder(
         toFile: "${tempDir.path}/audio_$_fileCount.wav");
+
     print('Recording started: audio_$_fileCount.wav');
 
     _timer = Timer.periodic(
