@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print('Recording started: audio_$_fileCount.wav');
 
     _timer = Timer.periodic(
-      const Duration(minutes: 1),
+      const Duration(minutes: 5),
       (timer) async {
         print('Timer triggered');
         String filePath = "${tempDir.path}/audio_$_fileCount.wav";
