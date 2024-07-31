@@ -19,8 +19,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -48,42 +46,40 @@ class _MyHomePageState extends State<MyHomePage> {
       throw RecordingPermissionException('Microphone permission not granted');
     }
     await _recorder.openRecorder();
-    print('Recorder initialized');
+    debugPrint('Recorder initialized');
   }
 
   Future<void> _initializePlayer() async {
     await player.openPlayer();
-    print('Player initialized');
+    debugPrint('Player initialized');
   }
 
   Future<void> _startRecording() async {
     Directory tempDir = await getTemporaryDirectory();
     await _recorder.startRecorder(
         toFile: "${tempDir.path}/audio_$_fileCount.wav");
-    print('Recording started: audio_$_fileCount.wav');
+    debugPrint('Recording started: audio_$_fileCount.wav');
 
     _timer = Timer.periodic(
       const Duration(minutes: 1),
       (timer) async {
-        print('Timer triggered');
+        debugPrint('Timer triggered');
         String filePath = "${tempDir.path}/audio_$_fileCount.wav";
         _lastFilePath = filePath;
         _fileCount++;
         await _uploadToFTP(filePath);
-        print('Recording started: audio_$_fileCount.wav');
+        debugPrint('Recording started: audio_$_fileCount.wav');
       },
     );
   }
 
-
-
   Future<void> _stopRecording() async {
     if (_recorder.isRecording ?? false) {
       await _recorder.stopRecorder();
-      print('Recording stopped');
+      debugPrint('Recording stopped');
     }
     _timer?.cancel();
-    print('Timer cancelled');
+    debugPrint('Timer cancelled');
     String filePath =
         "${(await getTemporaryDirectory()).path}/audio_$_fileCount.wav";
     _lastFilePath = filePath;
@@ -91,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _uploadToFTP(String filePath) async {
-    print('Uploading file: $filePath');
+    debugPrint('Uploading file: $filePath');
     FTPConnect ftpConnect = FTPConnect(
       '10.0.2.2',
       user: 'ftpuser',
@@ -102,10 +98,10 @@ class _MyHomePageState extends State<MyHomePage> {
       await ftpConnect.connect();
       await ftpConnect.uploadFile(File(filePath));
       await ftpConnect.disconnect();
-      print('File uploaded: $filePath');
+      debugPrint('File uploaded: $filePath');
       await _deleteFile(filePath);
     } catch (e) {
-      print('FTP upload failed: $e');
+      debugPrint('FTP upload failed: $e');
     }
   }
 
@@ -114,19 +110,19 @@ class _MyHomePageState extends State<MyHomePage> {
       final file = File(filePath);
       if (await file.exists()) {
         await file.delete();
-        print('File deleted: $filePath');
+        debugPrint('File deleted: $filePath');
       }
     } catch (e) {
-      print('File delete failed: $e');
+      debugPrint('File delete failed: $e');
     }
   }
 
   Future<void> _playRecording() async {
     if (_lastFilePath != null && await File(_lastFilePath!).exists()) {
       await player.startPlayer(fromURI: _lastFilePath!);
-      print('Playing recording: $_lastFilePath');
+      debugPrint('Playing recording: $_lastFilePath');
     } else {
-      print("No recording found or file doesn't exist.");
+      debugPrint("No recording found or file doesn't exist.");
     }
   }
 
