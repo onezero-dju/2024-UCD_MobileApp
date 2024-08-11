@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'viewmodels/user_viewmodel.dart';
-import 'views/screens/user_view.dart';
+import 'package:ucd/viewmodels/oz_view_model.dart';
+import 'package:ucd/views/screens/team_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => OrganizationViewModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,15 +19,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => UserViewModel(),
-      child: MaterialApp(
-        title: 'MVVM Example',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: const UserView(),
-      ),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: TeamListScreen(),
     );
   }
 }
