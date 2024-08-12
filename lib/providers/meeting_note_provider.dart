@@ -1,27 +1,17 @@
 import 'package:flutter/material.dart';
 
 class MeetingNoteProvider with ChangeNotifier {
-  Map<String, List<String>> meetingNotes = {};
+  Map<String, List<String>> meetingNotes = {}; // 각 카테고리에 대한 미팅 노트 목록
 
-  String? selectedCategory;
-  String? selectedMeetingNote;
   void addNewMeetingNote(String categoryId, String note) {
-    meetingNotes[categoryId] ??= [];
-    meetingNotes[categoryId]!.add(note);
-    notifyListeners();
+    if (categoryId.isNotEmpty && note.isNotEmpty) {
+      meetingNotes[categoryId] ??= [];
+      meetingNotes[categoryId]!.add(note); // 현재 카테고리에 미팅 노트 추가
+      notifyListeners();
+    }
   }
 
   List<String> getMeetingNotes(String categoryId) {
-    return meetingNotes[categoryId] ?? [];
-  }
-
-  void selectCategory(String categoryId) {
-    selectedCategory = categoryId;
-    notifyListeners();
-  }
-
-  void selectMeetingNote(String note) {
-    selectedMeetingNote = note;
-    notifyListeners();
+    return meetingNotes[categoryId] ?? []; // 카테고리에 해당하는 미팅 노트 목록 반환
   }
 }

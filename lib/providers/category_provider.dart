@@ -1,27 +1,23 @@
 import 'package:flutter/material.dart';
 
 class CategoryProvider with ChangeNotifier {
-  final Map<String, List<String>> _categories = {};
-  String? _selectedCategory;
+  Map<String, List<String>> categories = {}; // 각 채널에 대한 카테고리 목록
+  String? selectedCategory; // 현재 선택된 카테고리
 
-  // 카테고리 리스트 불러오기
-  List<String> getCategories(String channelId) {
-    return _categories[channelId] ?? [];
-  }
-
-  // 새로운 카테고리 추가
   void addNewCategory(String channelId, String categoryName) {
-    _categories[channelId] ??= [];
-    _categories[channelId]!.add(categoryName);
+    if (channelId.isNotEmpty) {
+      categories[channelId] ??= [];
+      categories[channelId]!.add(categoryName); // 현재 채널에 카테고리 추가
+      notifyListeners();
+    }
+  }
+
+  void selectCategory(String category) {
+    selectedCategory = category;
     notifyListeners();
   }
 
-  // 선택된 카테고리 설정
-  void selectCategory(String categoryId) {
-    _selectedCategory = categoryId;
-    notifyListeners();
+  List<String> getCategories(String channelId) {
+    return categories[channelId] ?? []; // 채널에 해당하는 카테고리 목록 반환
   }
-
-  // 선택된 카테고리 가져오기
-  String? get selectedCategory => _selectedCategory;
 }

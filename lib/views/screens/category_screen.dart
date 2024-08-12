@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/category_provider.dart';
 import 'package:ucd/providers/meeting_note_provider.dart';
+import 'package:ucd/providers/category_provider.dart';
 import 'package:ucd/providers/organization_provider.dart';
-import 'package:ucd/views/screens/meeting_note_list.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -62,8 +61,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   void _addNewMeetingNote(BuildContext context, String categoryId) {
     final meetingNoteProvider =
         Provider.of<MeetingNoteProvider>(context, listen: false);
-    meetingNoteProvider.selectCategory(categoryId); // 선택된 카테고리 설정
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -153,6 +150,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ElevatedButton(
                                 onPressed: () {
@@ -160,10 +158,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                     isExpanded[categoryId] =
                                         !(isExpanded[categoryId] ?? true);
                                   });
-                                  // 선택된 카테고리를 설정
-                                  Provider.of<MeetingNoteProvider>(context,
-                                          listen: false)
-                                      .selectCategory(categoryId);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.zero,
@@ -199,7 +193,34 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             ],
                           ),
                           if (expanded)
-                            const MeetingNoteScreen(), // 카테고리 선택 시 MeetingNoteScreen을 표시
+                            Column(
+                              children:
+                                  Provider.of<MeetingNoteProvider>(context)
+                                      .getMeetingNotes(categoryId)
+                                      .map((note) => Padding(
+                                            padding: EdgeInsets.only(
+                                                top: screenHeight * 0.01),
+                                            child: Container(
+                                              width: screenWidth * 0.6,
+                                              padding: EdgeInsets.all(
+                                                  screenWidth * 0.02),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                border: Border.all(
+                                                    color: Colors.black,
+                                                    width: screenWidth * 0.005),
+                                              ),
+                                              child: Text(
+                                                note,
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        screenWidth * 0.045),
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                            )
                         ],
                       ),
                     );
