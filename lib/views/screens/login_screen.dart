@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:ucd/views/screens/team_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -95,12 +95,17 @@ class _LoginScreenState extends State<LoginScreen>
                 ImageButton(
                   imagePath: 'assets/images/google_login.svg',
                   onPressed: () {
-                    _launchURL(
-                        //client id: 클라이언트 ID(애플리케이션 식별 역할)
-                        //redirect_uri: 벡인드 서버 uri
-                        //response_type: 권한 부여 코드 요청 지시
-                        //scope: 어떤 정보를 요청할지 권한 범위
-                        'https://accounts.google.com/o/oauth2/v2/auth?client_id=94929580240-hflmv2a514835bufvmacfajash3kira3.apps.googleusercontent.com&redirect_uri=http://localhost:8080/login/oauth2/code/google&response_type=code&scope=profile%20email');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TeamScreen()),
+                    );
+                    // _launchURL(
+                    //     //client id: 클라이언트 ID(애플리케이션 식별 역할)
+                    //     //redirect_uri: 벡인드 서버 uri
+                    //     //response_type: 권한 부여 코드 요청 지시
+                    //     //scope: 어떤 정보를 요청할지 권한 범위
+                    //     'https://accounts.google.com/o/oauth2/v2/auth?client_id=94929580240-hflmv2a514835bufvmacfajash3kira3.apps.googleusercontent.com&redirect_uri=http://localhost:8080/login/oauth2/code/google&response_type=code&scope=profile%20email');
                   },
                 ),
                 const SizedBox(height: 20),
@@ -108,8 +113,13 @@ class _LoginScreenState extends State<LoginScreen>
                 ImageButton(
                   imagePath: 'assets/images/naver_login_button.svg',
                   onPressed: () {
-                    _launchURL(
-                        'https://nid.naver.com/oauth2.0/authorize?client_id=hVb3dIveGV1qVblPIvPE&redirect_uri=http://localhost:8080/login/oauth2/code/naver&response_type=code');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TeamScreen()),
+                    );
+                    // _launchURL(
+                    //     'https://nid.naver.com/oauth2.0/authorize?client_id=hVb3dIveGV1qVblPIvPE&redirect_uri=http://localhost:8080/login/oauth2/code/naver&response_type=code');
                   },
                 ),
                 const SizedBox(height: 40),

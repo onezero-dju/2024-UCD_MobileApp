@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/viewmodels/oz_view_model.dart';
-import 'package:ucd/views/screens/team_screen.dart';
+import 'package:ucd/providers/organization_provider.dart';
+
+import 'package:ucd/views/screens/login_screen.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => OrganizationViewModel()),
+        ChangeNotifierProvider(create: (_) => OrganizationProvider()),
       ],
       child: const MyApp(),
     ),
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: TeamListScreen(),
+      home: LoginScreen(),
     );
   }
 }
