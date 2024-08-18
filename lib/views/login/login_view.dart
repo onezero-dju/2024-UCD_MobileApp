@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:ucd/views/screens/team_screen.dart';
+import 'package:ucd/views/organization/organization_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -55,39 +55,23 @@ class _LoginScreenState extends State<LoginScreen>
       body: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          return Container(
+          return SizedBox(
             width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: const [
-                  Color.fromARGB(255, 151, 158, 182),
-                  Color.fromARGB(255, 59, 204, 194)
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 1.0],
-                transform: GradientRotation(_controller.value * 3.14),
-              ),
-            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // KeyNote 로고
                 const SizedBox(height: 100),
-                const Icon(
-                  Icons.vpn_key_rounded,
-                  size: 100,
-                  color: Colors.white,
-                ),
+
                 const SizedBox(height: 20),
                 // Welcome 텍스트
                 const Text(
-                  "Welcome to KeyNote",
+                  "Key Note",
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 50,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color.fromARGB(255, 0, 0, 0),
                   ),
                 ),
                 const SizedBox(height: 350),
@@ -98,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const TeamScreen()),
+                          builder: (context) => const OrganizationScreen()),
                     );
                     // _launchURL(
                     //     //client id: 클라이언트 ID(애플리케이션 식별 역할)
@@ -116,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const TeamScreen()),
+                          builder: (context) => const OrganizationScreen()),
                     );
                     // _launchURL(
                     //     'https://nid.naver.com/oauth2.0/authorize?client_id=hVb3dIveGV1qVblPIvPE&redirect_uri=http://localhost:8080/login/oauth2/code/naver&response_type=code');

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/organization_provider.dart';
 
-class ChapterScreen extends StatelessWidget {
-  const ChapterScreen({super.key});
+import 'package:ucd/views/category/category_view.dart';
+import 'package:ucd/views/organization/organization_view_model.dart'; // 새로 추가된 카테고리 화면 import
+
+class ChannelScreen extends StatelessWidget {
+  const ChannelScreen({super.key});
 
   void _addNewChannel(BuildContext context) {
-    final provider = Provider.of<OrganizationProvider>(context, listen: false);
+    final provider = Provider.of<OrganizationViewModel>(context, listen: false);
     if (provider.selectedOrganization != null) {
       showDialog(
         context: context,
@@ -48,11 +50,11 @@ class ChapterScreen extends StatelessWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    return Consumer<OrganizationProvider>(
+    return Consumer<OrganizationViewModel>(
       builder: (context, provider, child) {
         if (provider.selectedOrganization == null) {
           return const Center(child: Text("조직을 선택하세요"));
-        } else {
+        } else if (provider.selectedChannel == null) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -73,11 +75,11 @@ class ChapterScreen extends StatelessWidget {
                       onPressed: () => _addNewChannel(context),
                       icon: Icon(
                         Icons.add,
-                        size: screenWidth * 0.07, // 아이콘 크기 비례 설정
+                        size: screenWidth * 0.07,
                       ),
                       color: Colors.black,
-                      iconSize: screenWidth * 0.07, // 아이콘 크기 비례 설정
-                      splashColor: Colors.grey.withOpacity(0.2), // 터치 시 색상
+                      iconSize: screenWidth * 0.07,
+                      splashColor: Colors.grey.withOpacity(0.2),
                     ),
                   ],
                 ),
@@ -95,12 +97,13 @@ class ChapterScreen extends StatelessWidget {
                           top: screenWidth * 0.06),
                       child: ElevatedButton(
                         onPressed: () {
-                          // 채널 선택 시 실행할 동작
+                          provider.selectChannel(provider
+                              .channels[provider.selectedOrganization]![index]);
                         },
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.zero, // 내부 패딩 제거
-                          fixedSize: Size(screenWidth * 0.2,
-                              screenHeight * 0.06), // 고정 크기 설정 (너비, 높이)
+                          padding: EdgeInsets.zero,
+                          fixedSize:
+                              Size(screenWidth * 0.2, screenHeight * 0.06),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
@@ -124,6 +127,9 @@ class ChapterScreen extends StatelessWidget {
               SizedBox(height: screenHeight * 0.03),
             ],
           );
+        } else {
+          // 채널이 선택된 경우 카테고리 화면을 표시합니다.
+          return const CategoryScreen();
         }
       },
     );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/organization_provider.dart';
-import 'chapter_screen.dart';
+import 'package:ucd/views/organization/organization_view_model.dart';
+import '../channel/channel_view.dart';
 
-class TeamScreen extends StatelessWidget {
-  const TeamScreen({super.key});
+class OrganizationScreen extends StatelessWidget {
+  const OrganizationScreen({super.key});
 
   void _addNewOrganization(BuildContext context) {
     showDialog(
@@ -30,7 +30,7 @@ class TeamScreen extends StatelessWidget {
               child: const Text("추가"),
               onPressed: () {
                 if (newOrganizationName.isNotEmpty) {
-                  Provider.of<OrganizationProvider>(context, listen: false)
+                  Provider.of<OrganizationViewModel>(context, listen: false)
                       .addNewOrganization(newOrganizationName);
                 }
                 Navigator.of(context).pop();
@@ -57,7 +57,7 @@ class TeamScreen extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: Consumer<OrganizationProvider>(
+                  child: Consumer<OrganizationViewModel>(
                     builder: (context, provider, child) {
                       return ListView.builder(
                         itemCount: provider.organizations.length,
@@ -96,7 +96,6 @@ class TeamScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
                 ElevatedButton(
                   onPressed: () => _addNewOrganization(context),
                   style: ElevatedButton.styleFrom(
@@ -119,7 +118,7 @@ class TeamScreen extends StatelessWidget {
           ),
           // 오른쪽 패널 - 새로운 파일에서 불러오기
           const Expanded(
-            child: ChapterScreen(),
+            child: ChannelScreen(),
           ),
         ],
       ),
