@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/organization_provider.dart';
-import 'package:ucd/providers/meeting_note_provider.dart';
-import 'package:ucd/providers/category_provider.dart';
+import 'package:ucd/views/category/category_view_model.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
 
-import 'package:ucd/views/screens/login_screen.dart';
+import 'package:ucd/views/login/login_view.dart';
+import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
+import 'package:ucd/views/organization/organization_view_model.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => OrganizationProvider()),
-        ChangeNotifierProvider(create: (_) => MeetingNoteProvider()),
+        ChangeNotifierProvider(create: (_) => OrganizationViewModel()),
+        ChangeNotifierProvider(create: (_) => MeetingNoteViewModel()),
         ChangeNotifierProvider(
-            create: (_) => CategoryProvider()), // CategoryProvider 추가
+            create: (_) => CategoryViewModel()), // CategoryProvider 추가
+        ChangeNotifierProvider(create: (_) => ChannelViewModel()), // Cat
       ],
       child: const MyApp(),
     ),

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/organization_provider.dart';
 
-import 'package:ucd/views/screens/category_screen.dart'; // 새로 추가된 카테고리 화면 import
+import 'package:ucd/views/category/category_view.dart';
+import 'package:ucd/views/organization/organization_view_model.dart'; // 새로 추가된 카테고리 화면 import
 
 class ChannelScreen extends StatelessWidget {
   const ChannelScreen({super.key});
 
   void _addNewChannel(BuildContext context) {
-    final provider = Provider.of<OrganizationProvider>(context, listen: false);
+    final provider = Provider.of<OrganizationViewModel>(context, listen: false);
     if (provider.selectedOrganization != null) {
       showDialog(
         context: context,
@@ -50,7 +50,7 @@ class ChannelScreen extends StatelessWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    return Consumer<OrganizationProvider>(
+    return Consumer<OrganizationViewModel>(
       builder: (context, provider, child) {
         if (provider.selectedOrganization == null) {
           return const Center(child: Text("조직을 선택하세요"));

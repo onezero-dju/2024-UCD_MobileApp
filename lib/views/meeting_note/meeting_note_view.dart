@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/meeting_note_provider.dart';
+import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
 
 class MeetingNoteScreen extends StatelessWidget {
   final String categoryId;
@@ -9,7 +9,7 @@ class MeetingNoteScreen extends StatelessWidget {
 
   void _addNewMeetingNote(BuildContext context) {
     final meetingNoteProvider =
-        Provider.of<MeetingNoteProvider>(context, listen: false);
+        Provider.of<MeetingNoteViewModel>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -49,7 +49,7 @@ class MeetingNoteScreen extends StatelessWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
     final meetingNotes =
-        Provider.of<MeetingNoteProvider>(context).getMeetingNotes(categoryId);
+        Provider.of<MeetingNoteViewModel>(context).getMeetingNotes(categoryId);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

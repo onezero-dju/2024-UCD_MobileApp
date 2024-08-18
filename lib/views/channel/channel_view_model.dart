@@ -1,7 +1,7 @@
 // channel_provider.dart
 import 'package:flutter/material.dart';
 
-class ChannelProvider with ChangeNotifier {
+class ChannelViewModel with ChangeNotifier {
   Map<String, List<String>> channels = {};
   String? selectedChannel;
 

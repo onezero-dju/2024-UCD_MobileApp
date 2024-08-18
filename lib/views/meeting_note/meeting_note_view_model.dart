@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class MeetingNoteProvider with ChangeNotifier {
+class MeetingNoteViewModel with ChangeNotifier {
   Map<String, List<String>> meetingNotes = {}; // 각 카테고리에 대한 미팅 노트 목록
 
   void addNewMeetingNote(String categoryId, String note) {

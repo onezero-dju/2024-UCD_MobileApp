@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class OrganizationProvider with ChangeNotifier {
+class OrganizationViewModel with ChangeNotifier {
   List<String> organizations = []; // 조직 목록
   Map<String, List<String>> channels = {}; // 각 조직에 대한 채널 목록
   String? selectedOrganization; // 현재 선택된 조직

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/providers/meeting_note_provider.dart';
-import 'package:ucd/providers/category_provider.dart';
-import 'package:ucd/providers/organization_provider.dart';
+import 'package:ucd/views/category/category_view_model.dart';
+import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
+import 'package:ucd/views/organization/organization_view_model.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
@@ -14,95 +14,14 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   Map<String, bool> isExpanded = {};
 
-  void _addNewCategory(BuildContext context) {
-    final categoryProvider =
-        Provider.of<CategoryProvider>(context, listen: false);
-    final selectedChannel =
-        Provider.of<OrganizationProvider>(context, listen: false)
-            .selectedChannel;
-
-    if (selectedChannel != null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          String newCategoryName = "";
-          return AlertDialog(
-            title: const Text("새로운 카테고리 추가"),
-            content: TextField(
-              onChanged: (value) {
-                newCategoryName = value;
-              },
-              decoration: const InputDecoration(hintText: "카테고리 이름을 입력하세요"),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("취소"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text("추가"),
-                onPressed: () {
-                  if (newCategoryName.isNotEmpty) {
-                    categoryProvider.addNewCategory(
-                        selectedChannel, newCategoryName);
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
-  void _addNewMeetingNote(BuildContext context, String categoryId) {
-    final meetingNoteProvider =
-        Provider.of<MeetingNoteProvider>(context, listen: false);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String newNote = "";
-        return AlertDialog(
-          title: const Text("새로운 Meeting Note 추가"),
-          content: TextField(
-            onChanged: (value) {
-              newNote = value;
-            },
-            decoration: const InputDecoration(hintText: "Meeting Note를 입력하세요"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("취소"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text("추가"),
-              onPressed: () {
-                if (newNote.isNotEmpty) {
-                  meetingNoteProvider.addNewMeetingNote(categoryId, newNote);
-                }
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
     final selectedChannel =
-        Provider.of<OrganizationProvider>(context).selectedChannel;
-    final categories =
-        Provider.of<CategoryProvider>(context).getCategories(selectedChannel!);
+        Provider.of<OrganizationViewModel>(context).selectedChannel;
+    final categoryViewModel = Provider.of<CategoryViewModel>(context);
+    final categories = categoryViewModel.getCategories(selectedChannel!);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +40,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ),
               ),
               IconButton(
-                onPressed: () => _addNewCategory(context),
+                onPressed: () => categoryViewModel.showAddCategoryDialog(
+                    context, selectedChannel),
                 icon: Icon(
                   Icons.add,
                   size: screenWidth * 0.07,
@@ -155,8 +75,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                               ElevatedButton(
                                 onPressed: () {
                                   setState(() {
-                                    isExpanded[categoryId] =
-                                        !(isExpanded[categoryId] ?? true);
+                                    categoryViewModel.toggleCategoryExpansion(
+                                        categoryId, isExpanded);
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -181,8 +101,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                 ),
                               ),
                               IconButton(
-                                onPressed: () =>
-                                    _addNewMeetingNote(context, categoryId),
+                                onPressed: () {
+                                  categoryViewModel.showAddMeetingNoteDialog(
+                                      context, categoryId);
+                                },
                                 icon: Icon(
                                   Icons.add,
                                   size: screenWidth * 0.07,
@@ -195,7 +117,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                           if (expanded)
                             Column(
                               children:
-                                  Provider.of<MeetingNoteProvider>(context)
+                                  Provider.of<MeetingNoteViewModel>(context)
                                       .getMeetingNotes(categoryId)
                                       .map((note) => Padding(
                                             padding: EdgeInsets.only(
