@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ucd/views/category/category_view_model.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
 import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
 import 'package:ucd/views/organization/organization_view_model.dart';
 
@@ -19,9 +20,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
     final selectedChannel =
-        Provider.of<OrganizationViewModel>(context).selectedChannel;
+        Provider.of<ChannelViewModel>(context).selectedChannel;
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
     final categories = categoryViewModel.getCategories(selectedChannel!);
+
+    // Print the organization, channel, and category details
+    print(
+        'Current organization: ${Provider.of<OrganizationViewModel>(context).selectedOrganization}');
+    print('Current channel: $selectedChannel');
+    print('Categories in the current channel: $categories');
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -78,6 +85,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                     categoryViewModel.toggleCategoryExpansion(
                                         categoryId, isExpanded);
                                   });
+                                  // Print information when a category is expanded or collapsed
+                                  print('Toggled category: $categoryId');
+                                  print('Current channel: $selectedChannel');
                                 },
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.zero,
