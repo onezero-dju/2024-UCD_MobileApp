@@ -98,9 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _startRecording() async {
     Directory tempDir = await getTemporaryDirectory(); // 임시 디렉토리 가져오기
-    String filePath = "${tempDir.path}/audio_$_fileCount.wav";
+    String filePath = "${tempDir.path}/audio_$_fileCount.mp4";
     await _recorder.startRecorder(toFile: filePath); // 녹음 시작
-    print('Recording started: audio_$_fileCount.wav'); // 녹음 시작 메시지 출력
+    print('Recording started: audio_$_fileCount.mp4'); // 녹음 시작 메시지 출력
   }
 
   Future<void> _restartRecording() async {
@@ -108,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
       await _recorder.stopRecorder(); // 녹음 중지
       print('Recording stopped for restart'); // 녹음 중지 메시지 출력
       String filePath =
-          "${(await getTemporaryDirectory()).path}/audio_$_fileCount.wav";
+          "${(await getTemporaryDirectory()).path}/audio_$_fileCount.mp4";
       _lastFilePath = filePath;
       _ftpUploadController.add(filePath); // FTP 업로드 요청
       _fileCount++;
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _timerSubscription?.cancel(); // 타이머 구독 취소
     print('Timer cancelled'); // 타이머 취소 메시지 출력
     String filePath =
-        "${(await getTemporaryDirectory()).path}/audio_$_fileCount.wav";
+        "${(await getTemporaryDirectory()).path}/audio_$_fileCount.mp4";
     _lastFilePath = filePath;
     _ftpUploadController.add(filePath); // FTP 업로드 요청
   }

@@ -1,32 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
 
 class OrganizationViewModel with ChangeNotifier {
   List<String> organizations = []; // 조직 목록
-  Map<String, List<String>> channels = {}; // 각 조직에 대한 채널 목록
   String? selectedOrganization; // 현재 선택된 조직
-  String? selectedChannel; // 현재 선택된 채널
 
-  void addNewOrganization(String newOrganizationName) {
-    organizations.add(newOrganizationName);
-    channels[newOrganizationName] = []; // 새로운 조직에 대한 채널 리스트 초기화
-    notifyListeners();
+  // 새로운 조직 추가 및 다이얼로그 로직을 함께 처리
+  void showAddOrganizationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String newOrganizationName = "";
+        return AlertDialog(
+          title: const Text("새로운 조직 추가"),
+          content: TextField(
+            onChanged: (value) {
+              newOrganizationName = value;
+            },
+            decoration: const InputDecoration(hintText: "조직 이름을 입력하세요"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("취소"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("추가"),
+              onPressed: () {
+                if (newOrganizationName.isNotEmpty) {
+                  addNewOrganization(newOrganizationName);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  void addNewChannel(String channelName) {
-    if (selectedOrganization != null) {
-      channels[selectedOrganization]!.add(channelName); // 현재 선택된 조직에 채널 추가
-      notifyListeners();
-    }
+  // 새로운 조직을 리스트에 추가하고 초기화
+  void addNewOrganization(String newOrganizationName) {
+    organizations.add(newOrganizationName);
+    notifyListeners();
   }
 
   void selectOrganization(String organization) {
     selectedOrganization = organization;
-    selectedChannel = null; // 새로운 조직 선택 시 채널 초기화
-    notifyListeners();
-  }
+    // 새로운 조직을 선택할 때 채널을 초기화
 
-  void selectChannel(String channel) {
-    selectedChannel = channel;
     notifyListeners();
   }
 }

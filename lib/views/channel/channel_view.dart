@@ -1,60 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:ucd/views/channel/channel_view_model.dart';
 import 'package:ucd/views/category/category_view.dart';
-import 'package:ucd/views/organization/organization_view_model.dart'; // 새로 추가된 카테고리 화면 import
+import 'package:ucd/views/organization/organization_view_model.dart';
 
 class ChannelScreen extends StatelessWidget {
   const ChannelScreen({super.key});
-
-  void _addNewChannel(BuildContext context) {
-    final provider = Provider.of<OrganizationViewModel>(context, listen: false);
-    if (provider.selectedOrganization != null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          String newChannelName = "";
-          return AlertDialog(
-            title: const Text("새로운 채널 추가"),
-            content: TextField(
-              onChanged: (value) {
-                newChannelName = value;
-              },
-              decoration: const InputDecoration(hintText: "채널 이름을 입력하세요"),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("취소"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text("추가"),
-                onPressed: () {
-                  if (newChannelName.isNotEmpty) {
-                    provider.addNewChannel(newChannelName);
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    return Consumer<OrganizationViewModel>(
-      builder: (context, provider, child) {
-        if (provider.selectedOrganization == null) {
+    return Consumer2<OrganizationViewModel, ChannelViewModel>(
+      builder: (context, organizationProvider, channelProvider, child) {
+        final organizationId = organizationProvider.selectedOrganization;
+
+        if (organizationId == null) {
           return const Center(child: Text("조직을 선택하세요"));
-        } else if (provider.selectedChannel == null) {
+        } else if (channelProvider.selectedChannel == null ||
+            channelProvider.selectedOrganizationId != organizationId) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -72,7 +37,8 @@ class ChannelScreen extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => _addNewChannel(context),
+                      onPressed: () => channelProvider.showAddChannelDialog(
+                          context, organizationId),
                       icon: Icon(
                         Icons.add,
                         size: screenWidth * 0.07,
@@ -88,8 +54,10 @@ class ChannelScreen extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   itemCount:
-                      provider.channels[provider.selectedOrganization]!.length,
+                      channelProvider.channels[organizationId]?.length ?? 0,
                   itemBuilder: (context, index) {
+                    final channel =
+                        channelProvider.channels[organizationId]![index];
                     return Padding(
                       padding: EdgeInsets.only(
                           right: screenWidth * 0.2,
@@ -97,8 +65,8 @@ class ChannelScreen extends StatelessWidget {
                           top: screenWidth * 0.06),
                       child: ElevatedButton(
                         onPressed: () {
-                          provider.selectChannel(provider
-                              .channels[provider.selectedOrganization]![index]);
+                          channelProvider.selectChannel(
+                              organizationId, channel);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -115,8 +83,7 @@ class ChannelScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          provider
-                              .channels[provider.selectedOrganization]![index],
+                          channel,
                           style: TextStyle(fontSize: screenWidth * 0.05),
                         ),
                       ),
