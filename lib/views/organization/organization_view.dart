@@ -13,7 +13,7 @@ class OrganizationScreen extends StatelessWidget {
     final double buttonSize = screenWidth * 0.15; // 버튼 크기를 동일하게 설정
 
     return Consumer<OrganizationViewModel>(
-      builder: (context, provider, child) {
+      builder: (context, viewModel, child) {
         return Scaffold(
           body: Row(
             children: [
@@ -24,16 +24,16 @@ class OrganizationScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ListView.builder(
-                        itemCount: provider.organizations.length,
+                        itemCount: viewModel.organizations.length,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: EdgeInsets.all(screenWidth * 0.02),
                             child: ElevatedButton(
                               onPressed: () {
-                                provider.selectOrganization(
-                                    provider.organizations[index]);
+                                viewModel.selectOrganization(
+                                    viewModel.organizations[index]);
                                 print(
-                                    "Selected Organization: ${provider.selectedOrganization}");
+                                    "Selected Organization: ${viewModel.selectedOrganization}");
                               },
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
@@ -41,8 +41,8 @@ class OrganizationScreen extends StatelessWidget {
                                 fixedSize:
                                     Size(buttonSize, buttonSize), // 고정 크기 설정
                                 backgroundColor:
-                                    provider.selectedOrganization ==
-                                            provider.organizations[index]
+                                    viewModel.selectedOrganization ==
+                                            viewModel.organizations[index]
                                         ? Colors.blue
                                         : Colors.white,
                                 foregroundColor: Colors.black,
@@ -51,7 +51,7 @@ class OrganizationScreen extends StatelessWidget {
                                     width: screenWidth * 0.005),
                               ),
                               child: Text(
-                                provider.organizations[index],
+                                viewModel.organizations[index],
                                 style: TextStyle(fontSize: screenWidth * 0.04),
                                 textAlign: TextAlign.center,
                               ),
@@ -62,7 +62,7 @@ class OrganizationScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () =>
-                          provider.showAddOrganizationDialog(context),
+                          viewModel.showAddOrganizationDialog(context),
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
                         shape: const CircleBorder(), // 원형 버튼

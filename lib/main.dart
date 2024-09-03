@@ -4,6 +4,7 @@ import 'package:ucd/views/category/category_view_model.dart';
 import 'package:ucd/views/channel/channel_view_model.dart';
 
 import 'package:ucd/views/login/login_view.dart';
+import 'package:ucd/views/login/sign_up_view_model.dart';
 import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
 import 'package:ucd/views/organization/organization_view_model.dart';
 
@@ -16,6 +17,7 @@ void main() {
         ChangeNotifierProvider(
             create: (_) => CategoryViewModel()), // CategoryProvider 추가
         ChangeNotifierProvider(create: (_) => ChannelViewModel()), // Cat
+        ChangeNotifierProvider(create: (_) => SignUpViewModel()),
       ],
       child: const MyApp(),
     ),

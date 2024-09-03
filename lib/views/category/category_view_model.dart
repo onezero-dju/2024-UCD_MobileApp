@@ -64,6 +64,12 @@ class CategoryViewModel with ChangeNotifier {
     );
   }
 
+  void selectCategory(String category) {
+    selectedCategory = category;
+    print('Selected Category: $selectedCategory'); // 로그로 확인합니다.
+    notifyListeners();
+  }
+
   // Meeting Note 추가를 위한 다이얼로그 메서드
   void showAddMeetingNoteDialog(BuildContext context, String categoryId) {
     showDialog(

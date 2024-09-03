@@ -1,111 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ucd/views/organization/organization_view_model.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
+import 'package:ucd/views/category/category_view_model.dart';
 import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
 
-class MeetingNoteScreen extends StatelessWidget {
-  final String categoryId;
+class MeetingNoteScreen extends StatefulWidget {
+  const MeetingNoteScreen({super.key});
 
-  const MeetingNoteScreen({super.key, required this.categoryId});
+  @override
+  _MeetingNoteScreenState createState() => _MeetingNoteScreenState();
+}
 
-  void _addNewMeetingNote(BuildContext context) {
-    final meetingNoteProvider =
-        Provider.of<MeetingNoteViewModel>(context, listen: false);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String newNote = "";
-        return AlertDialog(
-          title: const Text("새로운 Meeting Note 추가"),
-          content: TextField(
-            onChanged: (value) {
-              newNote = value;
-            },
-            decoration: const InputDecoration(hintText: "Meeting Note를 입력하세요"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("취소"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text("추가"),
-              onPressed: () {
-                if (newNote.isNotEmpty) {
-                  meetingNoteProvider.addNewMeetingNote(categoryId, newNote);
-                }
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+class _MeetingNoteScreenState extends State<MeetingNoteScreen> {
+  bool isMeetingStarted = false;
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final meetingNotes =
-        Provider.of<MeetingNoteViewModel>(context).getMeetingNotes(categoryId);
+    final selectedNote =
+        Provider.of<MeetingNoteViewModel>(context).selectedNote;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Meeting Notes",
+    return Consumer4<OrganizationViewModel, ChannelViewModel, CategoryViewModel,
+        MeetingNoteViewModel>(
+      builder: (context, organizationProvider, channelProvider,
+          categoryProvider, meetingNoteProvider, child) {
+        final selectedOrganization = organizationProvider.selectedOrganization;
+        final selectedChannel = channelProvider.selectedChannel;
+        final selectedCategory = categoryProvider.selectedCategory;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: selectedNote != null
+                ? Text(
+                    selectedNote,
+                    style: const TextStyle(fontSize: 24),
+                  )
+                : const Center(
+                    child: Text(
+                      '제목 없음',
+                      style:
+                          TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+                    ),
+                  ),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.mic,
+                    size: 100,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isMeetingStarted = true;
+                    });
+
+                    if (selectedNote != null) {
+                      print('회의 시작');
+                      print('조직: $selectedOrganization');
+                      print('채널: $selectedChannel');
+                      print('카테고리: $selectedCategory');
+                      print('회의 노트: $selectedNote');
+                    } else {
+                      print('회의 노트가 선택되지 않았습니다.');
+                    }
+                  },
+                ),
+                if (isMeetingStarted)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Text(
+                      '실시간 협업 공간 webview 작동중',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isMeetingStarted = false;
+                          });
+                        },
+                        child: const Text(
+                          '회의 종료',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        )),
+                  ],
+                )
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Text(
+              '요약',
               style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            IconButton(
-              onPressed: () => _addNewMeetingNote(context),
-              icon: Icon(
-                Icons.add,
-                size: screenWidth * 0.07,
-              ),
-              color: Colors.black,
-              iconSize: screenWidth * 0.07,
-              splashColor: Colors.grey.withOpacity(0.2),
-            ),
-          ],
-        ),
-        if (meetingNotes.isEmpty)
-          Padding(
-            padding: EdgeInsets.only(top: screenHeight * 0.02),
-            child: const Text("아직 Meeting Note가 없습니다."),
-          )
-        else
-          ...meetingNotes.map((note) => Padding(
-                padding: EdgeInsets.only(
-                  top: screenHeight * 0.01,
-                ),
-                child: Container(
-                  width: screenWidth * 0.8,
-                  padding: EdgeInsets.all(screenWidth * 0.02),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: Colors.black,
-                      width: screenWidth * 0.005,
-                    ),
-                  ),
-                  child: Text(
-                    note,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.045,
-                    ),
-                  ),
-                ),
-              ))
-      ],
+          ),
+        );
+      },
     );
   }
 }

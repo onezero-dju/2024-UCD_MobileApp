@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:ucd/views/channel/channel_view_model.dart';
 
 class OrganizationViewModel with ChangeNotifier {
   List<String> organizations = []; // 조직 목록
