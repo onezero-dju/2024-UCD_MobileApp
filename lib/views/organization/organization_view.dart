@@ -3,8 +3,27 @@ import 'package:provider/provider.dart';
 import 'package:ucd/views/organization/organization_view_model.dart';
 import '../channel/channel_view.dart';
 
-class OrganizationScreen extends StatelessWidget {
+class OrganizationScreen extends StatefulWidget {
   const OrganizationScreen({super.key});
+
+  @override
+  State<OrganizationScreen> createState() => _OrganizationScreenState();
+}
+
+class _OrganizationScreenState extends State<OrganizationScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // 로그인 후 받은 JWT 토큰을 여기에 전달하세요.
+    const String token = "your_jwt_token_here";
+
+    // 화면이 처음 빌드된 후 ViewModel의 메서드를 호출합니다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<OrganizationViewModel>(context, listen: false)
+          .fetchUserInfo(token);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +45,18 @@ class OrganizationScreen extends StatelessWidget {
                       child: ListView.builder(
                         itemCount: viewModel.organizations.length,
                         itemBuilder: (context, index) {
+                          // 각 조직의 데이터를 가져옵니다.
+                          final organization = viewModel.organizations[index];
+
                           return Padding(
                             padding: EdgeInsets.all(screenWidth * 0.02),
                             child: ElevatedButton(
                               onPressed: () {
+                                // 선택된 조직의 ID를 저장합니다.
                                 viewModel.selectOrganization(
-                                    viewModel.organizations[index]);
+                                    organization['organization_id'].toString());
                                 print(
-                                    "Selected Organization: ${viewModel.selectedOrganization}");
+                                    "Selected Organization: ${viewModel.selectedOrganizationId}");
                               },
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
@@ -41,17 +64,19 @@ class OrganizationScreen extends StatelessWidget {
                                 fixedSize:
                                     Size(buttonSize, buttonSize), // 고정 크기 설정
                                 backgroundColor:
-                                    viewModel.selectedOrganization ==
-                                            viewModel.organizations[index]
+                                    viewModel.selectedOrganizationId ==
+                                            organization['organization_id']
+                                                .toString()
                                         ? Colors.blue
-                                        : Colors.white,
+                                        : Colors.white, // 조직 ID로 배경색 설정
                                 foregroundColor: Colors.black,
                                 side: BorderSide(
                                     color: Colors.black,
                                     width: screenWidth * 0.005),
                               ),
+                              // 버튼 텍스트에 organization_name을 사용합니다.
                               child: Text(
-                                viewModel.organizations[index],
+                                organization['organization_name'],
                                 style: TextStyle(fontSize: screenWidth * 0.04),
                                 textAlign: TextAlign.center,
                               ),

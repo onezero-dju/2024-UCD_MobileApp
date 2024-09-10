@@ -24,7 +24,8 @@ class _MeetingNoteScreenState extends State<MeetingNoteScreen> {
         MeetingNoteViewModel>(
       builder: (context, organizationProvider, channelProvider,
           categoryProvider, meetingNoteProvider, child) {
-        final selectedOrganization = organizationProvider.selectedOrganization;
+        final selectedOrganization =
+            organizationProvider.selectedOrganizationId;
         final selectedChannel = channelProvider.selectedChannel;
         final selectedCategory = categoryProvider.selectedCategory;
 

@@ -18,6 +18,17 @@ class LoginViewModel extends ChangeNotifier {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         // 응답 데이터 처리
+        if (responseData != null) {
+          if (responseData.containsKey('jwt')) {
+            String token = responseData['jwt'];
+            // await saveToken(token);
+            print(token);
+          } else {
+            print('JWT token is missing in the response');
+          }
+        } else {
+          print('Response data is null');
+        }
         print('Login Success: ${responseData['message']}');
       } else {
         // 에러 처리
