@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:ucd/repository/token.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
 
 class OrganizationViewModel with ChangeNotifier {
   List<Map<String, dynamic>> organizations = []; // 조직 목록 (ID와 이름을 함께 저장)
@@ -51,8 +53,8 @@ class OrganizationViewModel with ChangeNotifier {
                       newOrganizationName, newOrganizationDescription);
                   Navigator.of(context).pop();
                   print(organizations); // 현재 조직 목록 출력
-                  fetchUserInfo(
-                      "your_jwt_token_here"); // fetchUserInfo 호출로 목록 갱신
+                  fetchUserInfo("your_jwt_token_here",
+                      context); // fetchUserInfo 호출로 목록 갱신
                 }
               },
             ),
@@ -122,26 +124,29 @@ class OrganizationViewModel with ChangeNotifier {
   }
 
   // 서버로부터 사용자와 조직 정보를 가져오는 메서드
-  Future<void> fetchUserInfo(String token) async {
+  Future<void> fetchUserInfo(String token, BuildContext context) async {
     const String apiUrl =
-        'https://run.mocky.io/v3/d5776b50-fe82-4cdc-be4a-a7d4d3dd5781'; // 실제 API URL
+        'https://run.mocky.io/v3/d5776b50-fe82-4cdc-be4a-a7d4d3dd5781'; // 실제 API URL로 변경 필요
 
     final response = await http.get(
       Uri.parse(apiUrl),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Cookie': 'jwt=$token', // JWT 토큰을 포함
+        'Cookie': 'jwt=$token',
       },
     );
 
     if (response.statusCode == 200) {
-      print('Fetched user info successfully');
       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
-      // 서버로부터 받은 조직 정보를 organizations 리스트에 저장
+      // 서버로부터 받은 조직 정보를 저장
       organizations = List<Map<String, dynamic>>.from(
           responseData['data']['organizations']);
-      print("ddd: $organizations");
+
+      // 채널 데이터를 ChannelViewModel에 전달
+      Provider.of<ChannelViewModel>(context, listen: false)
+          .setChannelsFromOrganizations(organizations);
+
       notifyListeners(); // UI 갱신
     } else {
       print('Failed to fetch user info with status: ${response.statusCode}');

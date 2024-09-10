@@ -21,7 +21,7 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
     // 화면이 처음 빌드된 후 ViewModel의 메서드를 호출합니다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<OrganizationViewModel>(context, listen: false)
-          .fetchUserInfo(token);
+          .fetchUserInfo(token, context);
     });
   }
 

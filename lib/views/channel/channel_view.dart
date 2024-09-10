@@ -62,6 +62,7 @@ class ChannelScreen extends StatelessWidget {
                     // 조직별 채널 가져오기
                     final channel =
                         channelProvider.channels[organizationId]![index];
+
                     return Padding(
                       padding: EdgeInsets.only(
                           right: screenWidth * 0.2,
@@ -71,7 +72,7 @@ class ChannelScreen extends StatelessWidget {
                         onPressed: () {
                           // 채널 선택 시 채널을 설정
                           channelProvider.selectChannel(
-                              organizationId, channel);
+                              organizationId, channel['name']);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -81,7 +82,7 @@ class ChannelScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           backgroundColor:
-                              channelProvider.selectedChannel == channel
+                              channelProvider.selectedChannel == channel['name']
                                   ? Colors.blue // 선택된 채널을 파란색으로 표시
                                   : Colors.white,
                           foregroundColor: Colors.black,
@@ -91,7 +92,7 @@ class ChannelScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          channel,
+                          channel['name'],
                           style: TextStyle(fontSize: screenWidth * 0.05),
                         ),
                       ),
