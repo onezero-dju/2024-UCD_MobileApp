@@ -7,6 +7,34 @@ class ChannelViewModel with ChangeNotifier {
       {}; // 조직 ID를 키로 하고, 채널 리스트를 값으로 가짐
   String? selectedOrganizationId;
   String? selectedChannel;
+
+  // 채널 조회 메서드
+  Future<void> getChannels(String organizationId, String token) async {
+    const String apiUrl =
+        'https://run.mocky.io/v3/3799b59d-95aa-47cc-a412-f2bd0e547e80';
+    //'https://your-api-url.com/api/organizations/$organizationId/channels'; // API 명세에 따른 URL
+
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Cookie': 'jwt=$token', // JWT 토큰을 포함
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('Fetched channels successfully');
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+      // 서버로부터 받은 채널 데이터를 해당 조직에 추가
+      channels[organizationId] =
+          List<Map<String, dynamic>>.from(responseData['data']);
+      notifyListeners(); // UI 갱신
+    } else {
+      print('Failed to fetch channels with status: ${response.statusCode}');
+    }
+  }
+
   // 서버로부터 받은 채널 정보를 설정하는 메서드
   void setChannelsFromOrganizations(List<Map<String, dynamic>> organizations) {
     channels.clear();
@@ -15,7 +43,7 @@ class ChannelViewModel with ChangeNotifier {
       channels[organizationId] =
           List<Map<String, dynamic>>.from(organization['channels']);
     }
-    print(channels);
+
     notifyListeners(); // 채널 정보 갱신
   }
 
@@ -43,6 +71,7 @@ class ChannelViewModel with ChangeNotifier {
 
     if (response.statusCode == 201) {
       print('Channel created successfully!');
+      print(response.body);
       // 서버로 채널이 성공적으로 추가된 후 UI 업데이트를 위해 서버로부터 데이터를 다시 가져올 수 있습니다.
     } else {
       print('Failed to create channel with status: ${response.statusCode}');
