@@ -8,7 +8,7 @@ class SignUpModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'user_name': userName,
+      'username': userName,
       'email': email,
       'password': password,
     };

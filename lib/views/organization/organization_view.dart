@@ -1,16 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ucd/models/organization_model.dart';
 import 'package:ucd/views/organization/organization_view_model.dart';
 import '../channel/channel_view.dart';
 
-class OrganizationScreen extends StatelessWidget {
+class OrganizationScreen extends StatefulWidget {
   const OrganizationScreen({super.key});
+
+  @override
+  State<OrganizationScreen> createState() => _OrganizationScreenState();
+}
+
+class _OrganizationScreenState extends State<OrganizationScreen> {
+  bool _isFetching = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 처음에만 fetchUserOrganizations 호출되도록 처리
+    if (!_isFetching) {
+      _isFetching = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<OrganizationViewModel>(context, listen: false)
+            .fetchUserOrganizations(context)
+            .then((_) {});
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
     final double buttonSize = screenWidth * 0.15; // 버튼 크기를 동일하게 설정
+    // 화면이 빌드된 후 fetchUserOrganizations 실행
 
     return Consumer<OrganizationViewModel>(
       builder: (context, viewModel, child) {
@@ -26,12 +50,13 @@ class OrganizationScreen extends StatelessWidget {
                       child: ListView.builder(
                         itemCount: viewModel.organizations.length,
                         itemBuilder: (context, index) {
+                          final organization = viewModel.organizations[index];
                           return Padding(
                             padding: EdgeInsets.all(screenWidth * 0.02),
                             child: ElevatedButton(
                               onPressed: () {
-                                viewModel.selectOrganization(
-                                    viewModel.organizations[index]);
+                                print(organization);
+                                viewModel.selectOrganization(organization);
                                 print(
                                     "Selected Organization: ${viewModel.selectedOrganization}");
                               },
@@ -42,7 +67,7 @@ class OrganizationScreen extends StatelessWidget {
                                     Size(buttonSize, buttonSize), // 고정 크기 설정
                                 backgroundColor:
                                     viewModel.selectedOrganization ==
-                                            viewModel.organizations[index]
+                                            organization
                                         ? Colors.blue
                                         : Colors.white,
                                 foregroundColor: Colors.black,
@@ -51,7 +76,7 @@ class OrganizationScreen extends StatelessWidget {
                                     width: screenWidth * 0.005),
                               ),
                               child: Text(
-                                viewModel.organizations[index],
+                                organization.name,
                                 style: TextStyle(fontSize: screenWidth * 0.04),
                                 textAlign: TextAlign.center,
                               ),
@@ -62,7 +87,7 @@ class OrganizationScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () =>
-                          viewModel.showAddOrganizationDialog(context),
+                          viewModel.showNoOrganizationsDialog(context),
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
                         shape: const CircleBorder(), // 원형 버튼

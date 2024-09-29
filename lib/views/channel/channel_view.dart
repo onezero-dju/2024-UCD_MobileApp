@@ -38,7 +38,7 @@ class ChannelScreen extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () => channelProvider.showAddChannelDialog(
-                          context, organizationId),
+                          context, organizationId as String),
                       icon: Icon(
                         Icons.add,
                         size: screenWidth * 0.07,
@@ -66,7 +66,7 @@ class ChannelScreen extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {
                           channelProvider.selectChannel(
-                              organizationId, channel);
+                              organizationId as String, channel);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,

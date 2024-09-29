@@ -5,8 +5,7 @@ import 'package:ucd/models/sign_up_model.dart';
 
 class SignUpViewModel extends ChangeNotifier {
   Future<void> signUp(SignUpModel signUpModel) async {
-    final url = Uri.parse(
-        'https://run.mocky.io/v3/f798099d-0087-4f83-b572-d3b2ced06a0e');
+    final url = Uri.parse('http://10.224.101.47:8080/api/users/signup');
 
     try {
       final response = await http.post(
@@ -14,7 +13,7 @@ class SignUpViewModel extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(signUpModel.toJson()),
+        body: jsonEncode(signUpModel.toJson()), // toJson 메서드를 사용하여 JSON으로 변환
       );
 
       if (response.statusCode == 200) {
@@ -34,7 +33,8 @@ class SignUpViewModel extends ChangeNotifier {
         }
       } else {
         // 에러 처리
-        print('Sign Up Failed: ${response.statusCode}');
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
     } catch (e) {
       print('Sign Up Error: $e');
