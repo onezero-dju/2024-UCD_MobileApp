@@ -14,12 +14,15 @@ class ChannelScreen extends StatelessWidget {
 
     return Consumer2<OrganizationViewModel, ChannelViewModel>(
       builder: (context, organizationProvider, channelProvider, child) {
-        final organizationId = organizationProvider.selectedOrganization;
+        // 선택된 조직의 ID를 가져옴
+        final organizationId = organizationProvider.selectedOrganizationId;
 
         if (organizationId == null) {
+          // 조직이 선택되지 않았을 때 표시
           return const Center(child: Text("조직을 선택하세요"));
         } else if (channelProvider.selectedChannel == null ||
             channelProvider.selectedOrganizationId != organizationId) {
+          // 채널이 선택되지 않았거나, 다른 조직이 선택되었을 때 채널 목록 표시
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -56,8 +59,10 @@ class ChannelScreen extends StatelessWidget {
                   itemCount:
                       channelProvider.channels[organizationId]?.length ?? 0,
                   itemBuilder: (context, index) {
+                    // 조직별 채널 가져오기
                     final channel =
                         channelProvider.channels[organizationId]![index];
+
                     return Padding(
                       padding: EdgeInsets.only(
                           right: screenWidth * 0.2,
@@ -65,6 +70,7 @@ class ChannelScreen extends StatelessWidget {
                           top: screenWidth * 0.06),
                       child: ElevatedButton(
                         onPressed: () {
+                          // 채널 선택 시 채널을 설정
                           channelProvider.selectChannel(
                               organizationId as String, channel);
                         },
@@ -75,7 +81,10 @@ class ChannelScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
-                          backgroundColor: Colors.white,
+                          backgroundColor:
+                              channelProvider.selectedChannel == channel['name']
+                                  ? Colors.blue // 선택된 채널을 파란색으로 표시
+                                  : Colors.white,
                           foregroundColor: Colors.black,
                           side: BorderSide(
                             color: Colors.black,
@@ -83,7 +92,7 @@ class ChannelScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          channel,
+                          channel['name'],
                           style: TextStyle(fontSize: screenWidth * 0.05),
                         ),
                       ),
@@ -95,7 +104,7 @@ class ChannelScreen extends StatelessWidget {
             ],
           );
         } else {
-          // 채널이 선택된 경우 카테고리 화면을 표시합니다.
+          // 채널이 선택된 경우 카테고리 화면을 표시
           return const CategoryScreen();
         }
       },

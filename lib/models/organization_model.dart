@@ -3,6 +3,7 @@ class Organization {
   final String name;
   final String description;
   final String role;
+
   final DateTime joinedAt;
 
   Organization({

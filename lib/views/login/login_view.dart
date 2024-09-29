@@ -111,6 +111,7 @@ class _LoginScreenState extends State<LoginScreen>
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: () {
+<<<<<<< HEAD
                                   if (_formKey.currentState?.validate() ??
                                       false) {
                                     final loginModel = LoginModel(
@@ -121,6 +122,25 @@ class _LoginScreenState extends State<LoginScreen>
                                             listen: false)
                                         .login(loginModel, context);
                                   }
+=======
+                                  // if (_formKey.currentState?.validate() ??
+                                  //     false) {
+                                  //   final loginModel = LoginModel(
+                                  //     email: _emailController.text,
+                                  //     password: _passwordController.text,
+                                  //   );
+                                  //   Provider.of<LoginViewModel>(context,
+                                  //           listen: false)
+                                  //       .login(loginModel);
+
+                                  // }
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const OrganizationScreen()),
+                                  );
+>>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
                                 },
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.zero,
@@ -229,13 +249,6 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       ),
     );
-  }
-
-  void _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri)) {
-      throw 'Could not launch $url';
-    }
   }
 }
 
