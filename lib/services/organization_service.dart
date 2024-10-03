@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class OrganizationService {
-  final String baseUrl = 'http://10.224.101.47:8080/api/organizations/my';
+  final String baseUrl = 'http://192.168.0.181:8080/api/organizations/my';
 
   // 조직 목록 조회
   Future<List<dynamic>> fetchOrganizations(String token) async {
@@ -36,7 +36,7 @@ class OrganizationService {
 
     // URL 확인
     final url = Uri.http(
-        '10.224.101.47:8080', '/api/organizations/search', queryParameters);
+        '192.168.0.181:8080', '/api/organizations/search', queryParameters);
 
     // 요청 전 정보 출력
     print('Request URL: $url');
@@ -74,7 +74,7 @@ class OrganizationService {
   Future<void> createOrganizations(
       String token, String name, String description) async {
     final response = await http.post(
-      Uri.parse('http://10.224.101.47:8080/api/organizations'),
+      Uri.parse('http://192.168.0.181:8080/api/organizations'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

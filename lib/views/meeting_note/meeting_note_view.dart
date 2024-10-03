@@ -24,8 +24,6 @@ class _MeetingNoteScreenState extends State<MeetingNoteScreen> {
         MeetingNoteViewModel>(
       builder: (context, organizationProvider, channelProvider,
           categoryProvider, meetingNoteProvider, child) {
-        final selectedOrganization =
-            organizationProvider.selectedOrganizationId;
         final selectedChannel = channelProvider.selectedChannel;
         final selectedCategory = categoryProvider.selectedCategory;
 
@@ -60,7 +58,7 @@ class _MeetingNoteScreenState extends State<MeetingNoteScreen> {
 
                     if (selectedNote != null) {
                       print('회의 시작');
-                      print('조직: $selectedOrganization');
+
                       print('채널: $selectedChannel');
                       print('카테고리: $selectedCategory');
                       print('회의 노트: $selectedNote');

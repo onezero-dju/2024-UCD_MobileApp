@@ -15,7 +15,7 @@ class ChannelScreen extends StatelessWidget {
     return Consumer2<OrganizationViewModel, ChannelViewModel>(
       builder: (context, organizationProvider, channelProvider, child) {
         // 선택된 조직의 ID를 가져옴
-        final organizationId = organizationProvider.selectedOrganizationId;
+        final organizationId = organizationProvider.selectedOrganization;
 
         if (organizationId == null) {
           // 조직이 선택되지 않았을 때 표시
@@ -72,7 +72,7 @@ class ChannelScreen extends StatelessWidget {
                         onPressed: () {
                           // 채널 선택 시 채널을 설정
                           channelProvider.selectChannel(
-                              organizationId as String, channel);
+                              organizationId as String, channel as String);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,

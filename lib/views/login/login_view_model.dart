@@ -8,7 +8,7 @@ import 'package:ucd/views/organization/organization_view.dart';
 
 class LoginViewModel extends ChangeNotifier {
   Future<void> login(LoginModel loginModel, BuildContext context) async {
-    final url = Uri.parse('http://10.224.101.47:8080/login');
+    final url = Uri.parse('http://192.168.0.181:8080/login');
 
     try {
       final response = await http.post(

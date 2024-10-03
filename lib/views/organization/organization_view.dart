@@ -12,16 +12,12 @@ class OrganizationScreen extends StatefulWidget {
 }
 
 class _OrganizationScreenState extends State<OrganizationScreen> {
-<<<<<<< HEAD
   bool _isFetching = false;
 
-=======
->>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
   @override
   void initState() {
     super.initState();
 
-<<<<<<< HEAD
     // 처음에만 fetchUserOrganizations 호출되도록 처리
     if (!_isFetching) {
       _isFetching = true;
@@ -31,16 +27,6 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
             .then((_) {});
       });
     }
-=======
-    // 로그인 후 받은 JWT 토큰을 여기에 전달하세요.
-    const String token = "your_jwt_token_here";
-
-    // 화면이 처음 빌드된 후 ViewModel의 메서드를 호출합니다.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OrganizationViewModel>(context, listen: false)
-          .fetchUserInfo(token, context);
-    });
->>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
   }
 
   @override
@@ -64,27 +50,13 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                       child: ListView.builder(
                         itemCount: viewModel.organizations.length,
                         itemBuilder: (context, index) {
-<<<<<<< HEAD
                           final organization = viewModel.organizations[index];
-=======
-                          // 각 조직의 데이터를 가져옵니다.
-                          final organization = viewModel.organizations[index];
-
->>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
                           return Padding(
                             padding: EdgeInsets.all(screenWidth * 0.02),
                             child: ElevatedButton(
                               onPressed: () {
-<<<<<<< HEAD
                                 print(organization);
                                 viewModel.selectOrganization(organization);
-=======
-                                // 선택된 조직의 ID를 저장합니다.
-                                viewModel.selectOrganization(
-                                    organization['organization_id'].toString());
->>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
-                                print(
-                                    "Selected Organization: ${viewModel.selectedOrganizationId}");
                               },
                               style: ElevatedButton.styleFrom(
                                 padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
@@ -92,14 +64,8 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                                 fixedSize:
                                     Size(buttonSize, buttonSize), // 고정 크기 설정
                                 backgroundColor:
-<<<<<<< HEAD
                                     viewModel.selectedOrganization ==
                                             organization
-=======
-                                    viewModel.selectedOrganizationId ==
-                                            organization['organization_id']
-                                                .toString()
->>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
                                         ? Colors.blue
                                         : Colors.white, // 조직 ID로 배경색 설정
                                 foregroundColor: Colors.black,
@@ -109,11 +75,7 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                               ),
                               // 버튼 텍스트에 organization_name을 사용합니다.
                               child: Text(
-<<<<<<< HEAD
                                 organization.name,
-=======
-                                organization['organization_name'],
->>>>>>> f1f35f33a0585c8d24fe232b905f721123d07e4b
                                 style: TextStyle(fontSize: screenWidth * 0.04),
                                 textAlign: TextAlign.center,
                               ),

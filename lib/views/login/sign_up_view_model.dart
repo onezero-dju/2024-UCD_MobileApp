@@ -5,7 +5,7 @@ import 'package:ucd/models/sign_up_model.dart';
 
 class SignUpViewModel extends ChangeNotifier {
   Future<void> signUp(SignUpModel signUpModel) async {
-    final url = Uri.parse('http://10.224.101.47:8080/api/users/signup');
+    final url = Uri.parse('http://192.168.0.181:8080/api/users/signup');
 
     try {
       final response = await http.post(
