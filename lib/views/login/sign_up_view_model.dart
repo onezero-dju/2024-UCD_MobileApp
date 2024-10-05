@@ -1,54 +1,52 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:ucd/models/sign_up_model.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:ucd/models/user_model.dart';
+// import 'package:ucd/services/auth_service.dart/sign_up_service.dart';
+
+
+// class SignUpViewModel extends ChangeNotifier {
+//   final SignUpService _signUpService = SignUpService();
+
+//   Future<void> signUp(UserModel userModel) async {
+//     final success = await _signUpService.signUp(userModel);
+//     if (success) {
+//       print('Sign Up Success');
+//     } else {
+//       print('Sign Up Failed');
+//     }
+//   }
+// }
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ucd/models/user_model.dart';
+import 'package:ucd/services/auth_service.dart/sign_up_service.dart';
+
 
 class SignUpViewModel extends ChangeNotifier {
-  Future<void> signUp(SignUpModel signUpModel) async {
-    final url = Uri.parse('http://192.168.0.181:8080/api/users/signup');
+  final SignUpService _signUpService = SignUpService();
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
+  Future<void> signUp(UserModel userModel, BuildContext context) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(signUpModel.toJson()), // toJson 메서드를 사용하여 JSON으로 변환
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
-        // 실제 응답을 확인해보기 위해 추가한 코드
-        print('Response Body: ${response.body}');
-        print('User Name: ${signUpModel.userName}');
-        print('Email: ${signUpModel.email}');
-        print('Password: ${signUpModel.password}');
-
-        // 서버 응답 처리
-        if (responseData.containsKey('message')) {
-          print('Sign Up Success: ${responseData['message']}');
-        } else {
-          print('Sign Up Success, but no message in response.');
-        }
+      final success = await _signUpService.signUp(userModel);
+      if (success) {
+       GoRouter.of(context).go('/');
       } else {
-        // 에러 처리
-        print('Error: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        _errorMessage = "회원가입 실패: 다시 시도해주세요.";
       }
     } catch (e) {
-      print('Sign Up Error: $e');
+      _errorMessage = "회원가입 에러: $e";
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-  }
-}
-
-class ObscureTextViewModel extends ChangeNotifier {
-  bool _obscureText = true;
-
-  bool get obscureText => _obscureText;
-
-  void toggleObscureText() {
-    _obscureText = !_obscureText;
-    notifyListeners();
   }
 }

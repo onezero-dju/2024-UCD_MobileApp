@@ -15,8 +15,9 @@ class OrganizationViewModel with ChangeNotifier {
   Future<void> fetchUserOrganizations(BuildContext context) async {
     try {
       final token = await getToken();
+      print("fetch했을 때 token 값: $token");
       final List<dynamic> fetchedData =
-          await organizationService.fetchOrganizations(token as String);
+          await organizationService.fetchOrganizations(token!);
       organizations =
           fetchedData.map((data) => Organization.fromJson(data)).toList();
 

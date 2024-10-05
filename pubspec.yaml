@@ -37,6 +37,7 @@ dependencies:
   flutter_sound: ^9.6.0
   flutter_svg: ^2.0.10+1
   ftpconnect: ^2.0.7
+  go_router: ^14.3.0
   http: ^1.2.2
   path: any
   path_provider: ^2.1.3

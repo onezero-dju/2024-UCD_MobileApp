@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class OrganizationService {
-  final String baseUrl = 'http://192.168.0.181:8080/api/organizations/my';
+  final String baseUrl = 'http://34.64.165.164:8080/api/organizations/my';
 
   // 조직 목록 조회
   Future<List<dynamic>> fetchOrganizations(String token) async {
@@ -17,8 +17,9 @@ class OrganizationService {
     );
     print(response.statusCode);
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      print(data);
+      final String decodeBody = utf8.decode(response.bodyBytes);  //utf8 수동 디코딩
+      final Map<String,dynamic> data = jsonDecode(decodeBody); 
+      print("response값은: $data");
       return data['data'] as List<dynamic>;
     } else {
       throw Exception('조직 데이터를 불러올 수 없습니다.');
@@ -36,7 +37,7 @@ class OrganizationService {
 
     // URL 확인
     final url = Uri.http(
-        '192.168.0.181:8080', '/api/organizations/search', queryParameters);
+        '34.64.165.164:8080', '/api/organizations/search', queryParameters);
 
     // 요청 전 정보 출력
     print('Request URL: $url');
@@ -74,7 +75,7 @@ class OrganizationService {
   Future<void> createOrganizations(
       String token, String name, String description) async {
     final response = await http.post(
-      Uri.parse('http://192.168.0.181:8080/api/organizations'),
+      Uri.parse('http://34.64.165.164:8080/api/organizations'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
