@@ -6,11 +6,10 @@ import 'package:ucd/services/token_service.dart';
 
 class OrganizationViewModel with ChangeNotifier {
   List<Organization> organizations = []; // 조직 목록
-  List<String> organizationNames = []; // 검색된 조직 이름 목록
+ List<String> searchResults = []; // 검색된 조직 목록// 검색된 조직 목록
   Organization? selectedOrganization; // 현재 선택된 조직
   final OrganizationService organizationService = OrganizationService();
 
-  // 사용자의 조직 정보 가져오기
   // 사용자의 조직 정보 가져오기
   Future<void> fetchUserOrganizations(BuildContext context) async {
     try {
@@ -18,9 +17,10 @@ class OrganizationViewModel with ChangeNotifier {
       print("fetch했을 때 token 값: $token");
       final List<dynamic> fetchedData =
           await organizationService.fetchOrganizations(token!);
+          print(fetchedData);
       organizations =
           fetchedData.map((data) => Organization.fromJson(data)).toList();
-
+  
       if (organizations.isNotEmpty) {
         selectOrganization(organizations.first); // 첫 번째 조직을 기본값으로 선택
       } else {
@@ -28,7 +28,7 @@ class OrganizationViewModel with ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      print('Erroddddr: $e');
+      print('Errord: $e');
     }
   }
 
@@ -38,23 +38,29 @@ class OrganizationViewModel with ChangeNotifier {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('조직이 없습니다'),
-          content: const Text('조직을 생성하거나 참여하세요.'),
+          content: const Text(
+            '조직을 생성하거나 참여하세요.',
+            style: TextStyle(fontSize: 20),
+          ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                showAddOrganizationDialog(context);
-              },
-              child: const Text('조직 생성'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _showSearchOrganizationsDialog(context); // 조직 검색 모달 창 띄우기
-                // 조직 참여 로직 추가
-              },
-              child: const Text('조직 참여'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showAddOrganizationDialog(context);
+                  },
+                  child: const Text('조직 생성'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showSearchOrganizationsDialog(context); // 조직 검색 모달 창 띄우기
+                  },
+                  child: const Text('조직 참여'),
+                ),
+              ],
             ),
           ],
         );
@@ -62,7 +68,7 @@ class OrganizationViewModel with ChangeNotifier {
     );
   }
 
-  // 새로운 조직 추가 및 다이얼로그 로직을 함께 처리
+  // 새로운 조직 추가 다이얼로그
   void showAddOrganizationDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -104,7 +110,7 @@ class OrganizationViewModel with ChangeNotifier {
                       context, newOrganizationName, newOrganizationDescription);
                   Navigator.of(context).pop();
                 } else {
-                  print("다 채워");
+                  print("모든 필드를 채워주세요.");
                 }
               },
             ),
@@ -114,35 +120,38 @@ class OrganizationViewModel with ChangeNotifier {
     );
   }
 
-  // 조직 검색
-  void _showSearchOrganizationsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String keyword = ""; // 검색어 변수
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
+  // 조직 검색 다이얼로그
+  // OrganizationViewModel에서 showSearchOrganizationsDialog 메서드 추가 또는 수정
+void showSearchOrganizationsDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      String keyword = ""; // 검색어 변수
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Expanded(
+            child: AlertDialog(
+              scrollable: true,
               title: const Text('조직 검색'),
               content: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   TextField(
                     onChanged: (value) {
-                      keyword = value; // 입력받은 검색어를 저장
+                      setState(() {
+                        keyword = value; // 입력받은 검색어를 저장
+                      });
                     },
                     decoration: const InputDecoration(hintText: '조직 이름을 입력하세요'),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (keyword.isNotEmpty) {
-                        // 검색어가 입력된 경우 검색 실행
-                        Provider.of<OrganizationViewModel>(context,
-                                listen: false)
-                            .searchOrganizations(
-                                keyword, 0, 10); // 첫 페이지, 10개 검색
-                        setState(() {}); // 상태 업데이트
+                        await searchOrganizations(keyword, 0, 10); // 첫 페이지, 10개 검색
+                        if (context.mounted) {
+                          setState(() {}); // 상태 업데이트
+                        }
                       }
                     },
                     child: const Text('검색'),
@@ -150,24 +159,25 @@ class OrganizationViewModel with ChangeNotifier {
                   const SizedBox(height: 16),
                   Consumer<OrganizationViewModel>(
                     builder: (context, viewModel, child) {
-                      if (viewModel.organizationNames.isEmpty) {
+                      if (keyword.isNotEmpty) {
+                        print(keyword);
+                        print(viewModel.searchResults);
                         return const Text('검색 결과가 없습니다.');
-                      }
-                      return ListView.builder(
-                        shrinkWrap: true, // 모달 창 크기에 맞춰 사이즈 조정
-                        itemCount: viewModel.organizationNames.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(viewModel.organizationNames[index]),
-                            onTap: () {
-                              // 조직 선택 시의 로직
-                              viewModel.selectOrganization(viewModel
-                                  .organizationNames[index] as Organization);
-                              Navigator.of(context).pop(); // 모달 닫기
-                            },
-                          );
-                        },
-                      );
+                      } else {
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: viewModel.searchResults.length,
+                          itemBuilder: (context, index) {
+                            final organizationName = viewModel.searchResults[index];
+                            return ListTile(
+                              title: Text(organizationName),
+                              onTap: () {
+                                Navigator.of(context).pop(); // 모달 닫기
+                              },
+                            );
+                          },
+                        );
+                      } 
                     },
                   ),
                 ],
@@ -180,45 +190,57 @@ class OrganizationViewModel with ChangeNotifier {
                   },
                 ),
               ],
-            );
-          },
-        );
-      },
-    );
-  }
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+
+
 
   // 조직 검색 메서드
-  Future<void> searchOrganizations(String keyword, int page, int size) async {
+ Future<void> searchOrganizations(String keyword, int page, int size) async {
     try {
       final token = await getToken(); // 토큰을 가져옴
-      print(token);
-      organizationNames = await organizationService.searchOrganization(
-          token as String, keyword, page, size); // 검색 수행
-
+      print("검색할 때: $token");
+      final fetchedData = await organizationService.searchOrganization(token!, keyword, page, size);
+      print("fetchedData: $fetchedData");
+ 
+     searchResults = fetchedData
+        .map((data) => data['organization_name'] as String)
+        .toList();
+     
+      print(searchResults);
       notifyListeners(); // UI 갱신
     } catch (e) {
       print('조직 검색 실패: $e');
     }
   }
 
+
+
+
   // 새로운 조직을 생성하고 목록을 다시 불러오기
   Future<void> createOrganization(
-      BuildContext context, // BuildContext를 매개변수로 받습니다.
+      BuildContext context,
       String newOrganizationName,
       String newOrganizationDescription) async {
-    // 토큰을 가져오기
-    final token = await getToken();
-
-    // OrganizationService의 createOrganizations에 이름과 설명 전달
-    await organizationService.createOrganizations(
-        token as String, newOrganizationName, newOrganizationDescription);
-
-    // 조직 목록 다시 불러오기 - context를 올바르게 전달
-    await fetchUserOrganizations(context);
+    try {
+      final token = await getToken();
+      print(token);
+      await organizationService.createOrganizations(
+          token!, newOrganizationName, newOrganizationDescription);
+      await fetchUserOrganizations(context);
+    } catch (e) {
+      print('조직 생성 실패: $e');
+    }
   }
 
   void selectOrganization(Organization organization) {
-    selectedOrganization = organization; // 조직 이름을 선택된 값으로 설정
+    selectedOrganization = organization;
     notifyListeners();
   }
 }

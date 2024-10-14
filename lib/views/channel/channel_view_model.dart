@@ -1,87 +1,53 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
+import 'package:ucd/services/channel_service.dart';
+import 'package:ucd/services/token_service.dart';
 
 class ChannelViewModel with ChangeNotifier {
-  Map<String, List<Map<String, dynamic>>> channels =
-      {}; // 조직 ID를 키로 하고, 채널 리스트를 값으로 가짐
-  String? selectedOrganizationId;
-  String? selectedChannel;
+  final ChannelService _channelService = ChannelService();
 
+  Map<String, List<Map<String, dynamic>>> channels = {};
+  int? selectedOrganizationId;
+  int? selectedChannel;
+  String? selectedChannelName;
   // 채널 조회 메서드
-  Future<void> getChannels(String organizationId, String token) async {
-    const String apiUrl =
-        'https://run.mocky.io/v3/3799b59d-95aa-47cc-a412-f2bd0e547e80';
-    //'https://your-api-url.com/api/organizations/$organizationId/channels'; // API 명세에 따른 URL
-
-    final response = await http.get(
-      Uri.parse(apiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Cookie': 'jwt=$token', // JWT 토큰을 포함
-      },
-    );
-
-    if (response.statusCode == 200) {
-      print('Fetched channels successfully');
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-      // 서버로부터 받은 채널 데이터를 해당 조직에 추가
-      channels[organizationId] =
-          List<Map<String, dynamic>>.from(responseData['data']);
-      notifyListeners(); // UI 갱신
-    } else {
-      print('Failed to fetch channels with status: ${response.statusCode}');
+  Future<void> fetchChannels(String organizationId, String token) async {
+    try {
+      
+      final fetchedChannels = await _channelService.getChannels(organizationId);
+      print(fetchedChannels);
+      channels[organizationId] = fetchedChannels;
+      notifyListeners();
+    } catch (e) {
+      print('Failed to fetch channels: $e');
     }
-  }
-
-  // 서버로부터 받은 채널 정보를 설정하는 메서드
-  void setChannelsFromOrganizations(List<Map<String, dynamic>> organizations) {
-    channels.clear();
-    for (var organization in organizations) {
-      final organizationId = organization['organization_id'].toString();
-      channels[organizationId] =
-          List<Map<String, dynamic>>.from(organization['channels']);
-    }
-
-    notifyListeners(); // 채널 정보 갱신
   }
 
   // 서버에 새로운 채널을 추가하는 메서드
-  Future<void> addNewChannel(String organizationId, String channelName,
-      String channelDescription) async {
-    // 실제 API URL을 설정합니다.
-    const String apiUrl =
-        'https://run.mocky.io/v3/acaf4b19-aed6-460a-a688-fa0c0947fd4e';
-
-    // JWT 토큰을 가져옵니다. (여기서는 null이 아님을 가정)
-    String token = "your_jwt_token_here";
-
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Cookie': 'jwt=$token', // JWT 토큰을 포함
-      },
-      body: jsonEncode({
-        "name": channelName, // 채널 이름
-        "description": channelDescription, // 채널 설명
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      print('Channel created successfully!');
-      print(response.body);
-      // 서버로 채널이 성공적으로 추가된 후 UI 업데이트를 위해 서버로부터 데이터를 다시 가져올 수 있습니다.
-    } else {
-      print('Failed to create channel with status: ${response.statusCode}');
+Future<void> addNewChannel(
+    String organizationId, String channelName, String channelDescription) async {
+  try {
+    final token = await getToken(); // 토큰을 비동기적으로 가져옴
+    if (token == null) {
+      throw Exception('토큰을 가져오지 못했습니다.');
     }
+
+    final success = await _channelService.addNewChannel(
+        organizationId, channelName, channelDescription, token);
+    if (success) {
+      await fetchChannels(organizationId, token); // 성공적으로 추가 후 채널 목록 갱신
+    }
+  } catch (e) {
+    print('채널 추가 중 오류 발생: $e');
   }
+}
+
 
   // 채널 선택 메서드
-  void selectChannel(String organizationId, String channel) {
+  void selectChannel(int organizationId, int channel, String channel_name) {
     selectedOrganizationId = organizationId;
     selectedChannel = channel;
+    selectedChannelName = channel_name;
     notifyListeners();
   }
 
@@ -92,11 +58,15 @@ class ChannelViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-// 채널 추가를 위한 다이얼로그 메서드
-  void showAddChannelDialog(BuildContext context, String organizationId) {
+  // 채널 추가를 위한 다이얼로그 메서드
+Future<void> showAddChannelDialog(BuildContext context, int organizationId) async {
+  try {
+
+   
+
     String newChannelName = "";
-    String newChannelDescription = ""; // 채널 설명을 위한 변수 추가
-    print(channels);
+    String newChannelDescription = "";
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -129,11 +99,12 @@ class ChannelViewModel with ChangeNotifier {
             TextButton(
               child: const Text("추가"),
               onPressed: () {
-                if (newChannelName.isNotEmpty) {
-                  // 조직 ID와 함께 채널 생성
+                if (newChannelName.isNotEmpty && newChannelDescription.isNotEmpty) {
                   addNewChannel(
-                      organizationId, newChannelName, newChannelDescription);
+                      organizationId.toString(), newChannelName, newChannelDescription);
                   Navigator.of(context).pop();
+                } else {
+                  print("모든 필드를 채워주세요.");
                 }
               },
             ),
@@ -141,5 +112,13 @@ class ChannelViewModel with ChangeNotifier {
         );
       },
     );
+  } catch (e) {
+    print('Error occurred while getting token: $e');
+    // 토큰을 가져오지 못한 경우 사용자에게 알림
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('토큰을 가져오는 데 실패했습니다. 다시 시도해주세요.')),
+    );
   }
+}
+
 }

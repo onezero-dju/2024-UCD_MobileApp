@@ -1,7 +1,7 @@
 class UserModel {
   final int? userId;
   final String email;
-  final String password;
+  final String? password; // Nullable로 변경
   final String? username;
   final String? role;
   final String? createdAt;
@@ -10,7 +10,7 @@ class UserModel {
   UserModel({
     this.userId,
     required this.email,
-    required this.password,
+    this.password, // Nullable로 변경
     this.username,
     this.role,
     this.createdAt,
@@ -22,7 +22,6 @@ class UserModel {
     return UserModel(
       userId: json['user_id'],
       email: json['email'],
-      password: json['password'],
       username: json['username'],
       role: json['role'],
       createdAt: json['created_at'],
@@ -41,5 +40,10 @@ class UserModel {
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
+  }
+
+  @override
+  String toString() {
+    return 'UserModel(userId: $userId, email: $email, username: $username, role: $role)';
   }
 }

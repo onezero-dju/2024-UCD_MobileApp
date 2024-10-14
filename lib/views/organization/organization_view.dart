@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ucd/models/organization_model.dart';
+import 'package:ucd/services/token_service.dart';
+import 'package:ucd/views/category/category_view_model.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
 import 'package:ucd/views/organization/organization_view_model.dart';
 import '../channel/channel_view.dart';
 
@@ -17,14 +20,25 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
   @override
   void initState() {
     super.initState();
-
     // 처음에만 fetchUserOrganizations 호출되도록 처리
     if (!_isFetching) {
       _isFetching = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Provider.of<OrganizationViewModel>(context, listen: false)
-            .fetchUserOrganizations(context)
-            .then((_) {});
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final organizationViewModel =
+            Provider.of<OrganizationViewModel>(context, listen: false);
+
+        await organizationViewModel.fetchUserOrganizations(context);
+        
+        // 선택된 조직이 있는 경우 채널 가져오기
+        if (organizationViewModel.selectedOrganization != null) {
+          final channelViewModel =
+              Provider.of<ChannelViewModel>(context, listen: false);
+          final selectedOrganization = organizationViewModel.selectedOrganization!;
+          final token = await getToken(); // 토큰 가져오기
+          if (token != null) {
+            channelViewModel.fetchChannels(selectedOrganization.id.toString(), token);
+          }
+        }
       });
     }
   }
@@ -34,10 +48,9 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
     final double buttonSize = screenWidth * 0.15; // 버튼 크기를 동일하게 설정
-    // 화면이 빌드된 후 fetchUserOrganizations 실행
 
-    return Consumer<OrganizationViewModel>(
-      builder: (context, viewModel, child) {
+    return Consumer3<OrganizationViewModel, ChannelViewModel, CategoryViewModel>(
+      builder: (context, organizationViewModel, channelViewModel, categoryViewModel, child) {
         return Scaffold(
           body: Row(
             children: [
@@ -48,32 +61,39 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                   children: [
                     Expanded(
                       child: ListView.builder(
-                        itemCount: viewModel.organizations.length,
+                        itemCount: organizationViewModel.organizations.length,
                         itemBuilder: (context, index) {
-                          final organization = viewModel.organizations[index];
+                          final organization = organizationViewModel.organizations[index];
                           return Padding(
                             padding: EdgeInsets.all(screenWidth * 0.02),
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 print(organization);
-                                viewModel.selectOrganization(organization);
+                                
+                                // 조직 선택 시 기존 채널 초기화
+                                channelViewModel.clearSelectedChannel();
+                                organizationViewModel.selectOrganization(organization);
+                                categoryViewModel.clearSelectedCategory();
+                                final token = await getToken();
+                                if (token != null) {
+                                  await channelViewModel.fetchChannels(
+                                    organization.id.toString(), token);
+                                }
                               },
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
-                                shape: const CircleBorder(), // 원형 버튼
-                                fixedSize:
-                                    Size(buttonSize, buttonSize), // 고정 크기 설정
+                                padding: EdgeInsets.zero,
+                                shape: const CircleBorder(),
+                                fixedSize: Size(buttonSize, buttonSize),
                                 backgroundColor:
-                                    viewModel.selectedOrganization ==
+                                    organizationViewModel.selectedOrganization ==
                                             organization
                                         ? Colors.blue
-                                        : Colors.white, // 조직 ID로 배경색 설정
+                                        : Colors.white,
                                 foregroundColor: Colors.black,
                                 side: BorderSide(
                                     color: Colors.black,
                                     width: screenWidth * 0.005),
                               ),
-                              // 버튼 텍스트에 organization_name을 사용합니다.
                               child: Text(
                                 organization.name,
                                 style: TextStyle(fontSize: screenWidth * 0.04),
@@ -86,11 +106,11 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () =>
-                          viewModel.showNoOrganizationsDialog(context),
+                          organizationViewModel.showNoOrganizationsDialog(context),
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
-                        shape: const CircleBorder(), // 원형 버튼
-                        fixedSize: Size(buttonSize, buttonSize), // 고정 크기 설정
+                        padding: EdgeInsets.zero,
+                        shape: const CircleBorder(),
+                        fixedSize: Size(buttonSize, buttonSize),
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
                         side: BorderSide(
@@ -98,14 +118,14 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                       ),
                       child: Icon(
                         Icons.add,
-                        size: screenWidth * 0.07, // 아이콘 크기 비례 설정
+                        size: screenWidth * 0.07,
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.03),
                   ],
                 ),
               ),
-              // 오른쪽 패널 - 새로운 파일에서 불러오기
+              // 오른쪽 패널 - ChannelScreen
               const Expanded(
                 child: ChannelScreen(),
               ),

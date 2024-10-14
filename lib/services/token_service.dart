@@ -3,13 +3,13 @@ import 'package:http/http.dart' as http;
 
 Future<void> saveToken(String token) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('data', token);
+  await prefs.setString('token', token);
   print("token 값은: $token");
 }
 
 Future<String?> getToken() async {
   final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('data');
+  return prefs.getString('token');
 }
 
 Future<void> sendRequest() async {

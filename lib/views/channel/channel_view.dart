@@ -1,12 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ucd/views/channel/channel_view_model.dart';
+import 'package:ucd/repository/token.dart';
+import 'package:ucd/services/token_service.dart';
 import 'package:ucd/views/category/category_view.dart';
-import 'package:ucd/views/organization/organization_view_model.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
+import '../organization/organization_view_model.dart';
 
-class ChannelScreen extends StatelessWidget {
+class ChannelScreen extends StatefulWidget {
   const ChannelScreen({super.key});
 
+  @override
+  State<ChannelScreen> createState() => _ChannelScreenState();
+}
+
+class _ChannelScreenState extends State<ChannelScreen> {
+
+  bool _isFetching = false;
+  
+ @override
+  void initState() {
+    super.initState();
+    // 처음에만 fetchChannels 호출되도록 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!_isFetching) {
+        _isFetching = true;
+
+        // 현재 선택된 조직 가져오기
+        final selectedOrganization =
+            Provider.of<OrganizationViewModel>(context, listen: false)
+                .selectedOrganization;
+          
+        if (selectedOrganization != null) {
+          // 토큰을 비동기적으로 가져오기
+          final token = await getToken();
+      print(token);
+          if (token != null) {
+            // 채널 정보를 가져오기
+            await Provider.of<ChannelViewModel>(context, listen: false)
+                .fetchChannels(selectedOrganization.id.toString(), token);
+          }
+        }
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -14,15 +50,11 @@ class ChannelScreen extends StatelessWidget {
 
     return Consumer2<OrganizationViewModel, ChannelViewModel>(
       builder: (context, organizationProvider, channelProvider, child) {
-        // 선택된 조직의 ID를 가져옴
-        final organizationId = organizationProvider.selectedOrganization;
+        final selectedOrganization = organizationProvider.selectedOrganization;
 
-        if (organizationId == null) {
-          // 조직이 선택되지 않았을 때 표시
+        if (selectedOrganization == null) {
           return const Center(child: Text("조직을 선택하세요"));
-        } else if (channelProvider.selectedChannel == null ||
-            channelProvider.selectedOrganizationId != organizationId) {
-          // 채널이 선택되지 않았거나, 다른 조직이 선택되었을 때 채널 목록 표시
+        } else if (channelProvider.selectedChannel == null ){
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -32,16 +64,18 @@ class ChannelScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // 선택된 조직의 이름을 표시 (null 여부 확인)
                     Text(
-                      '회의실',
+                      selectedOrganization.name ?? "조직 이름 없음",  // name이 null일 경우 대비
                       style: TextStyle(
                         fontSize: screenWidth * 0.08,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+              
                     IconButton(
                       onPressed: () => channelProvider.showAddChannelDialog(
-                          context, organizationId as String),
+                          context, selectedOrganization.id),
                       icon: Icon(
                         Icons.add,
                         size: screenWidth * 0.07,
@@ -56,13 +90,10 @@ class ChannelScreen extends StatelessWidget {
               SizedBox(height: screenHeight * 0.01),
               Expanded(
                 child: ListView.builder(
-                  itemCount:
-                      channelProvider.channels[organizationId]?.length ?? 0,
+                  itemCount: channelProvider.channels[selectedOrganization.id.toString()]?.length ?? 0,
                   itemBuilder: (context, index) {
-                    // 조직별 채널 가져오기
-                    final channel =
-                        channelProvider.channels[organizationId]![index];
-
+                    final channel = channelProvider.channels[selectedOrganization.id.toString()]![index];
+                    print(channel);
                     return Padding(
                       padding: EdgeInsets.only(
                           right: screenWidth * 0.2,
@@ -70,9 +101,8 @@ class ChannelScreen extends StatelessWidget {
                           top: screenWidth * 0.06),
                       child: ElevatedButton(
                         onPressed: () {
-                          // 채널 선택 시 채널을 설정
                           channelProvider.selectChannel(
-                              organizationId as String, channel as String);
+                              selectedOrganization.id, channel['channel_id'], channel['name']);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -83,7 +113,7 @@ class ChannelScreen extends StatelessWidget {
                           ),
                           backgroundColor:
                               channelProvider.selectedChannel == channel['name']
-                                  ? Colors.blue // 선택된 채널을 파란색으로 표시
+                                  ? Colors.blue
                                   : Colors.white,
                           foregroundColor: Colors.black,
                           side: BorderSide(
@@ -104,8 +134,8 @@ class ChannelScreen extends StatelessWidget {
             ],
           );
         } else {
-          // 채널이 선택된 경우 카테고리 화면을 표시
-          return const CategoryScreen();
+          
+       return CategoryView();
         }
       },
     );

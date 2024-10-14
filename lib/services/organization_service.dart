@@ -27,49 +27,32 @@ class OrganizationService {
   }
 
   //조직 조회
-  Future<List<String>> searchOrganization(
-      String token, String keyword, int page, int size) async {
-    final queryParameters = {
-      'keyword': keyword,
-      'page': page.toString(),
-      'size': size.toString(),
-    };
+  Future<List<dynamic>> searchOrganization(
+    String token, String keyword, int page, int size) async {
+  final queryParameters = {
+    'keyword': keyword,
+    'page': page.toString(),
+    'size': size.toString(),
+  };
 
-    // URL 확인
-    final url = Uri.http(
-        '34.64.165.164:8080', '/api/organizations/search', queryParameters);
+  final url = Uri.http(
+      '34.64.165.164:8080', '/api/organizations/search', queryParameters);
 
-    // 요청 전 정보 출력
-    print('Request URL: $url');
-    print(
-        'Request Headers: {Content-Type: application/json, Authorization: Bearer $token}');
-    print('Request Parameters: $queryParameters');
+  final response = await http.get(url, headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  });
 
-    final response = await http.get(url, headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    });
-
-    // 응답 상태코드와 응답 내용 출력
-    print('Response Status Code: ${response.statusCode}');
-    print('Response Headers: ${response.headers}');
-    print('Response Body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      final List<dynamic> organizations = data['data'] as List<dynamic>;
-
-      // 조직 이름만 리스트로 반환
-      return organizations
-          .map((org) => org['organizationName'] as String)
-          .toList();
-    } else {
-      print(
-          'Failed to fetch organizations. Status code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-      throw Exception('조직 검색에 실패했습니다.');
-    }
+  if (response.statusCode == 200) {
+    final String decodeBody = utf8.decode(response.bodyBytes);
+    final Map<String, dynamic> data = jsonDecode(decodeBody);
+    final List<dynamic> organizations = data['data'] as List<dynamic>;
+    print("service에서 organizations는: $organizations");
+    return organizations; // 전체 조직 데이터를 반환
+  } else {
+    throw Exception('조직 검색에 실패했습니다.');
   }
+}
 
   //조직 생성
   Future<void> createOrganizations(
