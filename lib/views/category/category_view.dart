@@ -242,29 +242,33 @@ class _CategoryViewState extends State<CategoryView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final channelProvider = Provider.of<ChannelViewModel>(context, listen: false);
-      final categoryProvider = Provider.of<CategoryViewModel>(context, listen: false);
-      final meetingProvider = Provider.of<MeetingNoteViewModel>(context, listen: false);
-      final int? channelId = channelProvider.selectedChannel;
-
-      if (channelId != null) {
-        print("initstate에서: $channelId");
-        await categoryProvider.fetchCategory(channelId); // 카테고리 목록을 가져옴
-        await meetingProvider.fetchMeetingNotes(channelId);
-      }
+    _fetchData();
     });
   }
 
+  Future<void> _fetchData() async {
+    final channelProvider = Provider.of<ChannelViewModel>(context, listen: false);
+    final categoryProvider = Provider.of<CategoryViewModel>(context, listen: false);
+    final meetingProvider = Provider.of<MeetingNoteViewModel>(context, listen: false);
+    final int? channelId = channelProvider.selectedChannel;
+
+    if (channelId != null) {
+      print("initstate에서: $channelId");
+      await categoryProvider.fetchCategory(channelId); // 카테고리 목록을 가져옴
+      await meetingProvider.fetchMeetingNotes(channelId);
+    }
+  }
   @override
   Widget build(BuildContext context) {
+
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
-
+    
     return Consumer3<CategoryViewModel, ChannelViewModel, MeetingNoteViewModel>(
       builder: (context, categoryProvider, channelProvider, meetingNoteProvider, child) {
         final int? channelId = channelProvider.selectedChannel;
         final String? channelName = channelProvider.selectedChannelName;
-
+        // meetingNoteProvider.fetchMeetingNotes(channelId!);
         if (channelId == null) {
           return const Scaffold(
             body: Center(child: Text("채널이 선택되지 않았습니다.")),
@@ -281,13 +285,14 @@ class _CategoryViewState extends State<CategoryView> {
         for (var meeting in meetings) {
           if (meeting.containsKey('category_id') && meeting['category_id'] != null) {
             final int categoryId = meeting['category_id'];
-            if (!categorizedMeetings.containsKey(categoryId)) {
+            if(categoryId == -1){
+                   uncategorizedMeetings.add(meeting);
+            }
+            else if (!categorizedMeetings.containsKey(categoryId)) {
               categorizedMeetings[categoryId] = [];
             }
-            categorizedMeetings[categoryId]!.add(meeting);
-          } else {
-            uncategorizedMeetings.add(meeting);
-          }
+            categorizedMeetings[categoryId]?.add(meeting);
+          } 
         }
 
         return Scaffold(
@@ -340,7 +345,7 @@ class _CategoryViewState extends State<CategoryView> {
                     // 카테고리별로 미팅 노트를 표시합니다.
                     for (var category in categories)
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                        padding: EdgeInsets.only(left: screenWidth * 0.04, bottom: screenHeight * 0.03,),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -427,7 +432,7 @@ class _CategoryViewState extends State<CategoryView> {
                     // 카테고리에 포함되지 않은 미팅 노트를 별도로 표시합니다.
                     if (uncategorizedMeetings.isNotEmpty)
                       Padding(
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02,horizontal: screenWidth * 0.04),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -439,28 +444,34 @@ class _CategoryViewState extends State<CategoryView> {
                               ),
                             ),
                             ...uncategorizedMeetings.map((meeting) {
-                              return Padding(
-                                padding: EdgeInsets.only(left: screenWidth * 0.1, top: screenHeight * 0.01),
-                                child: ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    fixedSize: Size(screenWidth * 0.8, screenHeight * 0.06),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
-                                    side: BorderSide(
-                                      color: Colors.black,
-                                      width: screenWidth * 0.005,
+                                final List<dynamic> meetingDtoList = meeting['meeting_dtolist'] ?? [];
+                              return Column(
+                                children: [
+                                      for (var meetingDto in meetingDtoList)
+                                  Padding(
+                                    padding: EdgeInsets.only( top: screenHeight * 0.01),
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        fixedSize: Size(screenWidth * 0.6, screenHeight * 0.06),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10.0),
+                                        ),
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.black,
+                                        side: BorderSide(
+                                          color: Colors.black,
+                                          width: screenWidth * 0.005,
+                                        ),
+                                      ),
+                                      child: Text(
+                                                                                   meetingDto['meeting_title'] ?? '미팅 제목 없음',
+                                        style: TextStyle(fontSize: screenWidth * 0.05),
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    meeting['meeting_title'] ?? '미팅 제목 없음',
-                                    style: TextStyle(fontSize: screenWidth * 0.05),
-                                  ),
-                                ),
+                                ],
                               );
                             }).toList(),
                           ],
@@ -534,7 +545,7 @@ class _CategoryViewState extends State<CategoryView> {
             ),
             TextButton(
               child: const Text("추가"),
-              onPressed: () {
+              onPressed: () async{
                 if (meetingTitle.isNotEmpty) {
                   meetingNoteProvider.createMeetingNote(
                     meetingTitle: meetingTitle,
@@ -544,7 +555,9 @@ class _CategoryViewState extends State<CategoryView> {
                     agenda: agenda,
                     context: context,
                   );
+                   await _fetchData();
                   Navigator.of(context).pop();
+         
                 }
               },
             ),

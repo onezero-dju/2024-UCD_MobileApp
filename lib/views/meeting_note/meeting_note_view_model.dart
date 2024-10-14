@@ -19,6 +19,7 @@ class MeetingNoteViewModel with ChangeNotifier {
     } catch (e) {
       print('Failed to fetch meeting notes: $e');
     }
+    notifyListeners();
   }
 
     Future<void> createMeetingNote({

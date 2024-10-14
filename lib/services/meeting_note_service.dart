@@ -41,7 +41,7 @@ class MeetingNoteService {
           
         }),
       );
-
+      fetchMeetingNotes(channelId);
       if (response.statusCode == 201) {
         print("Meeting note created successfully");
         return true;
