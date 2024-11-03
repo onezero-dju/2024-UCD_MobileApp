@@ -40,5 +40,15 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # Add the following line to enable permission_handler
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        # Add any permission_handler definitions here
+        'PERMISSION_MICROPHONE=1',  # 마이크 권한 요청을 활성화
+        # 추가적으로 필요하면 다른 권한도 활성화 가능
+      ]
+    end
   end
 end

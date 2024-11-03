@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:ucd/models/user_model.dart';
-import 'package:ucd/services/token_service.dart';
+import 'package:ucd/util/router/token_shared_preferences.dart';
 
 class LoginService {
   final String baseUrl = 'http://34.64.165.164:8080';
@@ -56,7 +56,7 @@ class LoginService {
 //     if (response.statusCode == 200) {
 //       final responseData = jsonDecode(response.body);
 //       print(responseData);
-      
+
 //       // 'data' 부분만 파싱하도록 수정
 //       final userData = responseData['data'];
 //       return UserModel.fromJson(userData);
@@ -69,4 +69,3 @@ class LoginService {
 //   return null;
 // }
 }
-

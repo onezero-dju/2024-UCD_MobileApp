@@ -115,7 +115,7 @@ class CategoryViewModel with ChangeNotifier {
   Map<int, List<Map<String, dynamic>>> categories = {}; // 채널별 카테고리 목록 저장
 
   String? selectedCategory; // 현재 선택된 카테고리
-
+  
   // 카테고리 조회
   Future<void> fetchCategory(int channelId) async {
     try {

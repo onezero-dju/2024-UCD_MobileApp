@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ucd/services/token_service.dart';
-
+import 'package:ucd/util/router/token_shared_preferences.dart';
 
 class ChannelService {
   // 채널 생성 메서드
-  Future<bool> addNewChannel(
-    
-      String organizationId, String channelName, String channelDescription, String token) async {
-    final String apiUrl = 'http://34.64.165.164:8080/api/organizations/$organizationId/channels';
- 
+  Future<bool> addNewChannel(String organizationId, String channelName,
+      String channelDescription, String token) async {
+    final String apiUrl =
+        'http://34.64.165.164:8080/api/organizations/$organizationId/channels';
+
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {
@@ -32,10 +31,10 @@ class ChannelService {
   }
 
   // 조직 내 채널 목록 조회 메서드
-  Future<List<Map<String, dynamic>>> getChannels(
-      String organizationId) async {
-        final token = await getToken();
-    final String apiUrl = 'http://34.64.165.164:8080/api/organizations/$organizationId/channels';
+  Future<List<Map<String, dynamic>>> getChannels(String organizationId) async {
+    final token = await getToken();
+    final String apiUrl =
+        'http://34.64.165.164:8080/api/organizations/$organizationId/channels';
 
     final response = await http.get(
       Uri.parse(apiUrl),

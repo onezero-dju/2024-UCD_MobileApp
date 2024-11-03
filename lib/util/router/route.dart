@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:ucd/views/channel/channel_view.dart';
 import 'package:ucd/views/login/login_view.dart';
 
 import 'package:ucd/views/login/sign_up_view.dart';
+import 'package:ucd/views/meeting_note/meeting_note_view.dart';
 import 'package:ucd/views/organization/organization_view.dart';
 
 final GoRouter router = GoRouter(
@@ -28,15 +28,20 @@ final GoRouter router = GoRouter(
       name: 'organization',
       builder: (context, state) => const OrganizationScreen(),
     ),
-      GoRoute(
+    GoRoute(
       path: '/channel',
       name: 'channel',
       builder: (context, state) => const ChannelScreen(),
     ),
-      GoRoute(
+    GoRoute(
       path: '/category',
       name: 'category',
       builder: (context, state) => CategoryView(),
+    ),
+    GoRoute(
+      path: '/meeting',
+      name: 'meeting',
+      builder: (context, state) => MeetingNoteView(),
     ),
   ],
 );

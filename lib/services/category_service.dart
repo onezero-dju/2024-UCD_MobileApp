@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ucd/services/token_service.dart';
+import 'package:ucd/util/router/token_shared_preferences.dart';
 
 class CategoryService {
   // 카테고리 생성 메서드
   Future<bool> addNewCategory(int channelId, String categoryName) async {
-    final String apiUrl = 'http://34.64.165.164:8080/api/channels/$channelId/categories';
+    final String apiUrl =
+        'http://34.64.165.164:8080/api/channels/$channelId/categories';
     final token = await getToken();
 
     if (token == null) {
@@ -39,14 +40,12 @@ class CategoryService {
   //   return []; // 임시로 빈 리스트를 반환
   // }
 
-
-
-   // 조직 내 카테고리 조회
-  Future<List<Map<String, dynamic>>> fetchCategory(
-      int channel_id ) async {
-        final token = await getToken();
-        print(token);
-    final String apiUrl = 'http://34.64.165.164:8080/api/channels/$channel_id/categories';
+  // 조직 내 카테고리 조회
+  Future<List<Map<String, dynamic>>> fetchCategory(int channelId) async {
+    final token = await getToken();
+    print(token);
+    final String apiUrl =
+        'http://34.64.165.164:8080/api/channels/$channelId/categories';
     print("category_service파일에서: $apiUrl");
     final response = await http.get(
       Uri.parse(apiUrl),
@@ -55,7 +54,7 @@ class CategoryService {
         'Authorization': 'Bearer $token',
       },
     );
-      final String decodeBody = utf8.decode(response.bodyBytes);  //utf8 수동 디코딩
+    final String decodeBody = utf8.decode(response.bodyBytes); //utf8 수동 디코딩
     if (response.statusCode == 200) {
       print('Fetched category successfully');
       print(List<Map<String, dynamic>>.from(jsonDecode(decodeBody)['data']));

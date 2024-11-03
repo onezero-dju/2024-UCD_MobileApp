@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ucd/models/user_model.dart';
 import 'package:ucd/services/auth_service.dart/login_service.dart';
-import 'package:ucd/services/token_service.dart';
+import 'package:ucd/util/router/token_shared_preferences.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final LoginService _loginService = LoginService();
@@ -48,12 +48,9 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-
-
-
   // 사용자 정보 조회
   Future<UserModel?> fetchUserInfo() async {
-    final String baseUrl = 'http://34.64.165.164:8080';
+    const String baseUrl = 'http://34.64.165.164:8080';
     final url = Uri.parse('$baseUrl/api/users/me');
     final token = await getToken();
 
@@ -72,7 +69,8 @@ class LoginViewModel extends ChangeNotifier {
       );
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print("usermodel.fromjson: ${UserModel.fromJson(responseData['data'])}");
+        print(
+            "usermodel.fromjson: ${UserModel.fromJson(responseData['data'])}");
         return UserModel.fromJson(responseData['data']);
       } else {
         print('Failed to get user info: ${response.statusCode}');

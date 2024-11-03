@@ -14,7 +14,7 @@ class Channel {
     required this.name,
     required this.organizationId,
     required this.updatedAt,
-  });
+  });                                           
 
   // JSON 데이터를 객체로 변환하는 팩토리 메서드
   factory Channel.fromJson(Map<String, dynamic> json) {

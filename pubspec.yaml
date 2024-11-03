@@ -36,6 +36,7 @@ dependencies:
     sdk: flutter
   flutter_sound: ^9.6.0
   flutter_svg: ^2.0.10+1
+  font_awesome_flutter: ^10.7.0
   ftpconnect: ^2.0.7
   go_router: ^14.3.0
   http: ^1.2.2
@@ -73,9 +74,27 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: Schyler
+    - family: Pretendard
       fonts:
-        - asset: assets/images/fonts/GmarketSansTTFMedium.ttf
+        - asset: assets/fonts/pretendard/Pretendard-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/pretendard/Pretendard-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/pretendard/Pretendard-Light.ttf
+          weight: 300
+        - asset: assets/fonts/pretendard/Pretendard-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/pretendard/Pretendard-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/pretendard/Pretendard-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/pretendard/Pretendard-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/pretendard/Pretendard-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/pretendard/Pretendard-Black.ttf
+          weight: 900
+
         # - asset: assets/fonts/GmarketSansTTFBold.ttf
         # - asset: assets/fonts/GmarketSansTTFLight.ttf
   #         style: italic
