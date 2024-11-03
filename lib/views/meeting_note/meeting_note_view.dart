@@ -1,111 +1,230 @@
+// lib/views/meeting_note/meeting_note_view.dart
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:ucd/views/meeting_note/meeting_note_view_model.dart';
 
-class MeetingNoteScreen extends StatelessWidget {
-  final String categoryId;
+class MeetingNoteView extends StatefulWidget {
+  const MeetingNoteView({super.key});
 
-  const MeetingNoteScreen({super.key, required this.categoryId});
+  @override
+  State<MeetingNoteView> createState() => _MeetingNoteViewState();
+}
 
-  void _addNewMeetingNote(BuildContext context) {
-    final meetingNoteProvider =
-        Provider.of<MeetingNoteViewModel>(context, listen: false);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String newNote = "";
-        return AlertDialog(
-          title: const Text("새로운 Meeting Note 추가"),
-          content: TextField(
-            onChanged: (value) {
-              newNote = value;
-            },
-            decoration: const InputDecoration(hintText: "Meeting Note를 입력하세요"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("취소"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text("추가"),
-              onPressed: () {
-                if (newNote.isNotEmpty) {
-                  meetingNoteProvider.addNewMeetingNote(categoryId, newNote);
-                }
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+class _MeetingNoteViewState extends State<MeetingNoteView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final meetingNoteProvider =
+          Provider.of<MeetingNoteViewModel>(context, listen: false);
+
+      // `selectedMeetingTitle`에서 `meetingId`를 가져오고, 방에 자동으로 입장
+      final String? meetingTitle = meetingNoteProvider.selectedMeetingTitle;
+      if (meetingTitle != null) {
+        final meetingId = meetingNoteProvider.getMeetingIdByTitle(meetingTitle);
+
+        if (meetingId != null) {
+          await meetingNoteProvider.fetchMeetingDetails(meetingId);
+          // await meetingNoteProvider.joinCollaborationRoom(meetingId);
+        }
+      }
+    });
   }
+
+  // @override
+  // void dispose() {
+  //   // 뷰가 해제될 때 실시간 협업 방 연결 종료
+  //   Provider.of<MeetingNoteViewModel>(context, listen: false)
+  //       .leaveCollaborationRoom();
+  //   super.dispose();
+  // }
+
+  //화면 나가면 협업방 탈출
+  // @override
+  // void dispose() {
+  //   final meetingNoteProvider =
+  //       Provider.of<MeetingNoteViewModel>(context, listen: false);
+  //   meetingNoteProvider.leaveCollaborationRoom();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final meetingNotes =
-        Provider.of<MeetingNoteViewModel>(context).getMeetingNotes(categoryId);
+    return Consumer<MeetingNoteViewModel>(
+      builder: (context, meetingNoteProvider, child) {
+        final String? meetingTitle = meetingNoteProvider.selectedMeetingTitle;
+        final participants =
+            meetingNoteProvider.selectedMeetingDetails?['participants'] ?? [];
+        final agenda =
+            meetingNoteProvider.selectedMeetingDetails?['agenda'] ?? '';
+        final meetingId =
+            meetingNoteProvider.selectedMeetingDetails?['id'] ?? '';
+        final participantCount = participants.length.toString();
+        final activeUsernames = meetingNoteProvider.activeUsernames;
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                context.pop(); // 카테고리, 회의 목록 화면으로 돌아가기
+              },
+              icon: const Icon(Icons.arrow_back_ios_new),
+            ),
+            title: Text(meetingTitle ?? 'Meeting'),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(60.0),
+              child: SizedBox(
+                height: 70.0,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  // itemCount: participants.length,
+                  itemCount: activeUsernames.length,
+                  itemBuilder: (context, index) {
+                    final username = activeUsernames[index];
+                    final participant = participants[index];
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black),
+                        ),
+                        child: CircleAvatar(
+                          radius: 30.0,
+                          backgroundColor: Colors.white,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              username,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Meeting Notes",
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.w500,
+                            // child: CircleAvatar(
+                            //   radius: 30.0,
+                            //   backgroundColor: Colors.white,
+                            //   child: FittedBox(
+                            //     fit: BoxFit.scaleDown,
+                            //     child: Text(
+                            //       participant['user_name'] ?? 'User',
+                            //       style: const TextStyle(
+                            //         color: Colors.black,
+                            //         fontSize: 12,
+                            //       ),
+                            //       textAlign: TextAlign.center,
+                            //     ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-            IconButton(
-              onPressed: () => _addNewMeetingNote(context),
-              icon: Icon(
-                Icons.add,
-                size: screenWidth * 0.07,
+          ),
+          body: Column(
+            children: [
+              const Divider(
+                height: 1,
+                color: Colors.black,
+                thickness: 1,
               ),
-              color: Colors.black,
-              iconSize: screenWidth * 0.07,
-              splashColor: Colors.grey.withOpacity(0.2),
-            ),
-          ],
-        ),
-        if (meetingNotes.isEmpty)
-          Padding(
-            padding: EdgeInsets.only(top: screenHeight * 0.02),
-            child: const Text("아직 Meeting Note가 없습니다."),
-          )
-        else
-          ...meetingNotes.map((note) => Padding(
-                padding: EdgeInsets.only(
-                  top: screenHeight * 0.01,
-                ),
-                child: Container(
-                  width: screenWidth * 0.8,
-                  padding: EdgeInsets.all(screenWidth * 0.02),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: Colors.black,
-                      width: screenWidth * 0.005,
+              const SizedBox(
+                height: 10,
+              ),
+              // Expanded를 사용하여 스크롤 가능한 영역을 설정
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Agenda: $agenda',
+                          style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.05,
+                        ),
+                        const Text(
+                          '회의 요약',
+                          style: TextStyle(
+                            fontSize: 30,
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.2,
+                        ),
+                        const Text(
+                          '안건 추천',
+                          style: TextStyle(
+                            fontSize: 30,
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.2,
+                        ),
+                        const Text(
+                          '결정 사항',
+                          style: TextStyle(
+                            fontSize: 30,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Text(
-                    note,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.045,
+                ),
+              ),
+              // 녹음 버튼을 화면 하단에 고정
+              if (meetingId.isNotEmpty && participantCount.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 25.0),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return ScaleTransition(
+                        scale: animation,
+                        child: child,
+                      );
+                    },
+                    child: IconButton(
+                      key: ValueKey<bool>(meetingNoteProvider.isRecording),
+                      iconSize: 60.0,
+                      icon: Icon(
+                        meetingNoteProvider.isRecording
+                            ? FontAwesomeIcons.circleStop
+                            : FontAwesomeIcons.microphone,
+                        color: meetingNoteProvider.isRecording
+                            ? Colors.red
+                            : Colors.black,
+                      ),
+                      tooltip:
+                          meetingNoteProvider.isRecording ? '회의 종료' : '회의 시작',
+                      onPressed: () {
+                        if (meetingNoteProvider.isRecording) {
+                          meetingNoteProvider.stopRecording();
+                        } else {
+                          meetingNoteProvider.startRecording();
+                        }
+                      },
                     ),
                   ),
                 ),
-              ))
-      ],
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,10 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ucd/models/organization_model.dart';
+import 'package:ucd/util/router/token_shared_preferences.dart';
+import 'package:ucd/views/category/category_view_model.dart';
+import 'package:ucd/views/channel/channel_view_model.dart';
 import 'package:ucd/views/organization/organization_view_model.dart';
 import '../channel/channel_view.dart';
 
-class OrganizationScreen extends StatelessWidget {
+class OrganizationScreen extends StatefulWidget {
   const OrganizationScreen({super.key});
+
+  @override
+  State<OrganizationScreen> createState() => _OrganizationScreenState();
+}
+
+class _OrganizationScreenState extends State<OrganizationScreen> {
+  bool _isFetching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 처음에만 fetchUserOrganizations 호출되도록 처리
+    if (!_isFetching) {
+      _isFetching = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final organizationViewModel =
+            Provider.of<OrganizationViewModel>(context, listen: false);
+
+        await organizationViewModel.fetchUserOrganizations(context);
+
+        // 선택된 조직이 있는 경우 채널 가져오기
+        if (organizationViewModel.selectedOrganization != null) {
+          final channelViewModel =
+              Provider.of<ChannelViewModel>(context, listen: false);
+          final selectedOrganization =
+              organizationViewModel.selectedOrganization!;
+          final token = await getToken(); // 토큰 가져오기
+          if (token != null) {
+            channelViewModel.fetchChannels(
+                selectedOrganization.id.toString(), token);
+          }
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +51,10 @@ class OrganizationScreen extends StatelessWidget {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double buttonSize = screenWidth * 0.15; // 버튼 크기를 동일하게 설정
 
-    return Consumer<OrganizationViewModel>(
-      builder: (context, provider, child) {
+    return Consumer3<OrganizationViewModel, ChannelViewModel,
+        CategoryViewModel>(
+      builder: (context, organizationViewModel, channelViewModel,
+          categoryViewModel, child) {
         return Scaffold(
           body: Row(
             children: [
@@ -24,34 +65,43 @@ class OrganizationScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ListView.builder(
-                        itemCount: provider.organizations.length,
+                        itemCount: organizationViewModel.organizations.length,
                         itemBuilder: (context, index) {
+                          final organization =
+                              organizationViewModel.organizations[index];
                           return Padding(
                             padding: EdgeInsets.all(screenWidth * 0.02),
                             child: ElevatedButton(
-                              onPressed: () {
-                                provider.selectOrganization(
-                                    provider.organizations[index]);
-                                print(
-                                    "Selected Organization: ${provider.selectedOrganization}");
+                              onPressed: () async {
+                                print(organization);
+
+                                // 조직 선택 시 기존 채널 초기화
+                                channelViewModel.clearSelectedChannel();
+                                organizationViewModel
+                                    .selectOrganization(organization);
+                                categoryViewModel.clearSelectedCategory();
+                                final token = await getToken();
+                                if (token != null) {
+                                  await channelViewModel.fetchChannels(
+                                      organization.id.toString(), token);
+                                }
                               },
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
-                                shape: const CircleBorder(), // 원형 버튼
-                                fixedSize:
-                                    Size(buttonSize, buttonSize), // 고정 크기 설정
-                                backgroundColor:
-                                    provider.selectedOrganization ==
-                                            provider.organizations[index]
-                                        ? Colors.blue
-                                        : Colors.white,
+                                padding: EdgeInsets.zero,
+                                shape: const CircleBorder(),
+                                fixedSize: Size(buttonSize, buttonSize),
+                                backgroundColor: organizationViewModel
+                                            .selectedOrganization ==
+                                        organization
+                                    ? Colors.blue
+                                    : Colors.white,
                                 foregroundColor: Colors.black,
                                 side: BorderSide(
                                     color: Colors.black,
                                     width: screenWidth * 0.005),
                               ),
                               child: Text(
-                                provider.organizations[index],
+                                organization.name,
                                 style: TextStyle(fontSize: screenWidth * 0.04),
                                 textAlign: TextAlign.center,
                               ),
@@ -61,12 +111,12 @@ class OrganizationScreen extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () =>
-                          provider.showAddOrganizationDialog(context),
+                      onPressed: () => organizationViewModel
+                          .showNoOrganizationsDialog(context),
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero, // 패딩을 없애고 버튼 크기 고정
-                        shape: const CircleBorder(), // 원형 버튼
-                        fixedSize: Size(buttonSize, buttonSize), // 고정 크기 설정
+                        padding: EdgeInsets.zero,
+                        shape: const CircleBorder(),
+                        fixedSize: Size(buttonSize, buttonSize),
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
                         side: BorderSide(
@@ -74,14 +124,14 @@ class OrganizationScreen extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.add,
-                        size: screenWidth * 0.07, // 아이콘 크기 비례 설정
+                        size: screenWidth * 0.07,
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.03),
                   ],
                 ),
               ),
-              // 오른쪽 패널 - 새로운 파일에서 불러오기
+              // 오른쪽 패널 - ChannelScreen
               const Expanded(
                 child: ChannelScreen(),
               ),

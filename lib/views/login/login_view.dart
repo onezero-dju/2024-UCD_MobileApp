@@ -1,38 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:ucd/models/user_model.dart';
+import 'package:ucd/views/login/login_view_model.dart';
 import 'package:ucd/views/organization/organization_view.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:ucd/views/widgets/text_field.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-void main() {
-  runApp(const KeyNoteApp());
-}
+import 'sign_up_view.dart'; // svg 관련 패키지
 
-class KeyNoteApp extends StatelessWidget {
-  const KeyNoteApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'KeyNote',
-      theme: ThemeData(
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const LoginScreen(),
-    );
-  }
-}
-
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginView
+ extends StatefulWidget {
+  const LoginView
+  ({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _LoginScreenState extends State<LoginView
+>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -46,80 +38,188 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void dispose() {
     _controller.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
+  }
+
+  String? _emailValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return '이메일을 입력하세요';
+    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+      return '이메일 형식을 맞춰주세요';
+    }
+    return null;
+  }
+
+  String? _passwordValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return '비밀번호를 입력해주세요';
+    } else if (value.length < 6) {
+      return '비밀번호가 너무 짧습니다.';
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return SizedBox(
-            width: double.infinity,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // KeyNote 로고
-                const SizedBox(height: 100),
-
-                const SizedBox(height: 20),
-                // Welcome 텍스트
-                const Text(
-                  "Key Note",
-                  style: TextStyle(
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ),
-                const SizedBox(height: 350),
-                // 구글 로그인 버튼
-                ImageButton(
-                  imagePath: 'assets/images/google_login.svg',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const OrganizationScreen()),
-                    );
-                    // _launchURL(
-                    //     //client id: 클라이언트 ID(애플리케이션 식별 역할)
-                    //     //redirect_uri: 벡인드 서버 uri
-                    //     //response_type: 권한 부여 코드 요청 지시
-                    //     //scope: 어떤 정보를 요청할지 권한 범위
-                    //     'https://accounts.google.com/o/oauth2/v2/auth?client_id=94929580240-hflmv2a514835bufvmacfajash3kira3.apps.googleusercontent.com&redirect_uri=http://localhost:8080/login/oauth2/code/google&response_type=code&scope=profile%20email');
-                  },
-                ),
-                const SizedBox(height: 20),
-                // 네이버 로그인 버튼
-                ImageButton(
-                  imagePath: 'assets/images/naver_login_button.svg',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const OrganizationScreen()),
-                    );
-                    // _launchURL(
-                    //     'https://nid.naver.com/oauth2.0/authorize?client_id=hVb3dIveGV1qVblPIvPE&redirect_uri=http://localhost:8080/login/oauth2/code/naver&response_type=code');
-                  },
-                ),
-                const SizedBox(height: 40),
-              ],
+    return ChangeNotifierProvider<LoginViewModel>(
+      create: (_) => LoginViewModel(),
+      child: Consumer<LoginViewModel>(
+        builder: (context, viewModel, child) {
+          return Scaffold(
+            body: SingleChildScrollView(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 100),
+                        const Text(
+                          "Key Note",
+                          style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                CustomTextField(
+                                  controller: _emailController,
+                                  hintText: '이메일',
+                                  icon: Icons.email,
+                                  validator: _emailValidator,
+                                ),
+                                const SizedBox(height: 20),
+                                CustomTextField(
+                                  controller: _passwordController,
+                                  hintText: '비밀번호',
+                                  icon: Icons.lock,
+                                  obscureText: true,
+                                  isPasswordField: true,
+                                  validator: _passwordValidator,
+                                ),
+                                const SizedBox(height: 40),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.8,
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: viewModel.isLoading
+                                        ? null
+                                        : () {
+                                            if (_formKey.currentState
+                                                    ?.validate() ??
+                                                false) {
+                                              final userModel = UserModel(
+                                                email: _emailController.text,
+                                                password: _passwordController
+                                                    .text,
+                                              );
+                                              viewModel.login(
+                                                  userModel, context);
+                                            }
+                                          },
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      side: const BorderSide(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    child: viewModel.isLoading
+                                        ? const CircularProgressIndicator()
+                                        : const Text('로그인',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 25,
+                                            )),
+                                  ),
+                                ),
+                                if (viewModel.errorMessage != null)
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      viewModel.errorMessage!,
+                                      style:
+                                          const TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 14,
+                                        top: 10,
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                         GoRouter.of(context).go('/signup');
+                                        },
+                                        child: const Text(
+                                          '회원가입 하기',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 100),
+                        // ImageButton(
+                        //   imagePath: 'assets/images/google_login.svg',
+                        //   onPressed: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) =>
+                        //               const OrganizationScreen()),
+                        //     );
+                        //   },
+                        // ),
+                        // const SizedBox(height: 20),
+                        // ImageButton(
+                        //   imagePath: 'assets/images/naver_login_button.svg',
+                        //   onPressed: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) =>
+                        //               const OrganizationScreen()),
+                        //     );
+                        //   },
+                        // ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           );
         },
       ),
     );
-  }
-
-  void _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri)) {
-      throw 'Could not launch $url';
-    }
   }
 }
 
@@ -145,12 +245,12 @@ class ImageButton extends StatelessWidget {
       ),
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
-        height: 50, // 버튼 높이 설정
+        height: 50,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
           child: SvgPicture.asset(
             imagePath,
-            fit: BoxFit.cover, // 이미지가 버튼 크기에 맞춰짐
+            fit: BoxFit.cover,
           ),
         ),
       ),

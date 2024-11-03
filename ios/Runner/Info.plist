@@ -3,7 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need your permission to use the microphone to record audio.</string>
+	<string>녹음을 위해 마이크 접근 권한이 필요합니다.</string>
+	<key>NSFileAccessUsageDescription</key>
+	<string>파일 저장 및 접근을 위해 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need your permission to access the photo library to save audio recordings.</string>
 	<key>NSCameraUsageDescription</key>
